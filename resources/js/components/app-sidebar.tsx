@@ -13,7 +13,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, PackageSearch, UserCog, GlobeLock, Users, KeyRound } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, PackageSearch, UserCog, GlobeLock, Users, KeyRound, Building2, Clock, Calendar, ClipboardList, Settings as SettingsIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import products from '@/routes/products';
 import users from '@/routes/users';
@@ -21,6 +21,13 @@ import roles from '@/routes/roles';
 import session from '@/routes/session';
 import apiSession from '@/routes/api-session';
 import apiKey from '@/routes/api-keys';
+import departments from '@/routes/departments';
+import shifts from '@/routes/shifts';
+import employees from '@/routes/employees';
+import holidays from '@/routes/holidays';
+import attendances from '@/routes/attendances';
+import attendance from '@/routes/attendance';
+import settings from '@/routes/settings';
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,6 +35,36 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
         permission: 'dashboard.view',
+    },
+    {
+        title: 'Monitor',
+        href: attendance && attendance.monitor ? attendance.monitor() : '#', // Safety check if route not yet generated
+        icon: ClipboardList,
+    },
+    {
+        title: 'Departments',
+        href: departments ? departments.index() : '#',
+        icon: Building2,
+    },
+    {
+        title: 'Shifts',
+        href: shifts ? shifts.index() : '#',
+        icon: Clock,
+    },
+    {
+        title: 'Employees',
+        href: employees ? employees.index() : '#',
+        icon: Users,
+    },
+    {
+        title: 'Holidays',
+        href: holidays ? holidays.index() : '#',
+        icon: Calendar,
+    },
+    {
+        title: 'Attendance History',
+        href: attendances ? attendances.index() : '#',
+        icon: ClipboardList,
     },
     {
         title: 'Products',
@@ -44,6 +81,11 @@ const mainNavItems: NavItem[] = [
 ];
 
 const settingNavItems: NavItem[] = [
+    {
+        title: 'Global Settings',
+        href: settings ? settings.index() : '#',
+        icon: SettingsIcon,
+    },
     {
         title: 'Role & Permission',
         href: roles.index(),

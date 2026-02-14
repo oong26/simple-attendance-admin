@@ -29,6 +29,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ApiSessionInterface::class, ApiSessionRepository::class);
         $this->app->bind(ApiKeyInterface::class, ApiKeyRepository::class);
         $this->app->bind(RolePermissionInterface::class, RolePermissionRepository::class);
+
+        // Attendance System
+        $this->app->bind(\App\Interfaces\DepartmentInterface::class, \App\Repositories\DepartmentRepository::class);
+        $this->app->bind(\App\Interfaces\ShiftInterface::class, \App\Repositories\ShiftRepository::class);
+        $this->app->bind(\App\Interfaces\EmployeeInterface::class, \App\Repositories\EmployeeRepository::class);
+        $this->app->bind(\App\Interfaces\HolidayInterface::class, \App\Repositories\HolidayRepository::class);
+        $this->app->bind(\App\Interfaces\AttendanceInterface::class, \App\Repositories\AttendanceRepository::class);
+        $this->app->bind(\App\Interfaces\SettingInterface::class, \App\Repositories\SettingRepository::class);
     }
 
     /**

@@ -12,7 +12,7 @@ class RolePermissionRepository implements RolePermissionInterface {
     {
         $name = $filter['q'] ?? null;
         $data = Role::when($name, function ($query) use ($name) {
-                $query->where('name', 'ILIKE', "%$name%");
+                $query->where('name', 'LIKE', "%$name%");
             })
             ->latest();
         if ($pagination) {
@@ -25,7 +25,7 @@ class RolePermissionRepository implements RolePermissionInterface {
     {
         $name = $filter['q'] ?? null;
         $data = Permission::when($name, function ($query) use ($name) {
-                $query->where('name', 'ILIKE', "%$name%");
+                $query->where('name', 'LIKE', "%$name%");
             })
             ->latest();
         if ($pagination) {

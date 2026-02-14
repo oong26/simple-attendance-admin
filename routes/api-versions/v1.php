@@ -16,6 +16,10 @@ Route::middleware(['api-key'])
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/profile', [AuthController::class, 'profile']);
             Route::post('/logout', [AuthController::class, 'logout']);
+
+            // Attendance Routes
+            Route::post('/attendance/clock-in', [\App\Http\Controllers\API\v1\AttendanceController::class, 'clockIn']);
+            Route::post('/attendance/clock-out', [\App\Http\Controllers\API\v1\AttendanceController::class, 'clockOut']);
         });
 
     });

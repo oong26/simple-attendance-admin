@@ -11,10 +11,10 @@ class ProductRepository implements ProductInterface {
         $name = $filter['q'] ?? null;
         $price = $filter['q'] ?? null;
         $data = Product::when($name, function ($query) use ($name) {
-                $query->where('name', 'ILIKE', "%$name%");
+                $query->where('name', 'LIKE', "%$name%");
             })
             ->when($price, function ($query) use ($price) {
-                $query->orWhere('price', 'ILIKE', "%$price%");
+                $query->orWhere('price', 'LIKE', "%$price%");
             })
             ->latest();
         if ($pagination) {

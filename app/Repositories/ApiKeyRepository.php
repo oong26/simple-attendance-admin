@@ -11,7 +11,7 @@ class ApiKeyRepository implements ApiKeyInterface {
     {
         $name = $filter['q'] ?? null;
         $data = ApiKey::when($name, function ($query) use ($name) {
-                $query->where('name', 'ILIKE', "%$name%");
+                $query->where('name', 'LIKE', "%$name%");
             })
             ->latest();
         if ($pagination) {

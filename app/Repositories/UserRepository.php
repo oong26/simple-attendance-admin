@@ -15,10 +15,10 @@ class UserRepository implements UserInterface {
         $relations = ['roles:id,name,guard_name'];
         $data = User::with($relations)
             ->when($name, function ($query) use ($name) {
-                $query->where('name', 'ILIKE', "%$name%");
+                $query->where('name', 'LIKE', "%$name%");
             })
             ->when($email, function ($query) use ($email) {
-                $query->orWhere('email', 'ILIKE', "%$email%");
+                $query->orWhere('email', 'LIKE', "%$email%");
             })
             ->latest();
         if ($pagination) {

@@ -6,6 +6,12 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Systems\ApiSessionController;
 use App\Http\Controllers\Systems\SessionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +23,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    // Departments
+    Route::resource('departments', DepartmentController::class);
+
+    // Shifts
+    Route::resource('shifts', ShiftController::class);
+
+    // Employees
+    Route::resource('employees', EmployeeController::class);
+
+    // Holidays
+    Route::resource('holidays', HolidayController::class);
+
+    // Attendance
+    Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('attendance/monitor', [AttendanceController::class, 'monitor'])->name('attendance.monitor');
+
+    // Settings
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+
     Route::prefix('products')
         ->name('products.')
         ->group(function () {

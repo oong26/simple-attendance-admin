@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: simple-attendance-admin
+    container_name: simple-attendance-app
+    restart: unless-stopped
+    ports:
+      - "8181:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8181
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - attendance-network
+
+  db:
+    image: mysql:8.0
+    container_name: simple-attendance-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-simple_attendance}
+      MYSQL_USER: ${DB_USERNAME:-attendance_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      # Mapping to host port 33060 to avoid conflicting with host's 3306
+      - "33060:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - attendance-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  attendance-network:
+    driver: bridge
+
+volumes:
+  db-data:

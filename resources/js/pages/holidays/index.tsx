@@ -45,6 +45,15 @@ export default function Index() {
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSynchronize = () => {
+        setSyncing(true);
+        router.post(holidays.synchronize.url(), {}, {
+            onFinish: () => setSyncing(false),
+        });
+    };
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearch(value);
@@ -83,9 +92,18 @@ export default function Index() {
                                 Showing {list.from} to {list.to} of {list.total} entries
                             </CardDescription>
                         </div>
-                        <Link href={holidays.create().url}>
-                            <Button>Create Holiday</Button>
-                        </Link>
+                        <div className="space-x-2">
+                            <Button
+                                variant="outline"
+                                onClick={handleSynchronize}
+                                disabled={syncing}
+                            >
+                                {syncing ? 'Syncing...' : 'Sync National Holidays'}
+                            </Button>
+                            <Link href={holidays.create().url}>
+                                <Button>Create Holiday</Button>
+                            </Link>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>

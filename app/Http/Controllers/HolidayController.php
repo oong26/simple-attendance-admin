@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\HolidayInterface;
+use App\Services\HolidayService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
@@ -92,6 +93,30 @@ class HolidayController extends Controller
         } catch (Exception $e) {
             Log::error('Holiday Destroy Error: ' . $e->getMessage());
             return back()->with('flash', $this->flashMessage('error'));
+        }
+    }
+
+    public function synchronize(HolidayService $service)
+    {
+        try {
+            $result = $service->synchronize();
+            if (isset($result['error'])) {
+                return redirect()
+                    ->route('holidays.index')
+                    ->with('flash', $this->flashMessage('error', $result['error']));
+            }
+            $count = $result['count'];
+            $year = date('Y');
+
+            return redirect()
+                ->route('holidays.index')
+                ->with('flash', $this->flashMessage('success', "Successfully synchronized $count national holidays for the year $year"));
+        } catch (Exception $e) {
+            Log::error('DayOff Synchronize Error');
+            Log::error($e);
+            return redirect()
+                ->route('holidays.index')
+                ->with('flash', $this->flashMessage('error', 'Failed to synchronize national holidays'));
         }
     }
 }

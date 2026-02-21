@@ -35,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Holidays
     Route::resource('holidays', HolidayController::class);
+    Route::post('/holidays/synchronize', [HolidayController::class, 'synchronize'])
+        ->name('holidays.synchronize');
 
     // Attendance
     Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');

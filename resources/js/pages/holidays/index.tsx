@@ -1,3 +1,5 @@
+import DeleteDialog from '@/components/delete-dialog';
+import TableControls from '@/components/table-controls';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -5,16 +7,21 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import MyPagination from '@/components/ui/my-pagination';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage, useForm } from '@inertiajs/react';
-import { useRef, useState } from 'react';
-import TableControls from '@/components/table-controls';
-import DeleteDialog from '@/components/delete-dialog';
 import holidays from '@/routes/holidays';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,7 +46,7 @@ export default function Index() {
     const { list, q } = usePage<any>().props as PageProps;
     const [search, setSearch] = useState(q ?? '');
     const [pageLength, setPageLength] = useState(
-        new URLSearchParams(window.location.search).get("perPage") ?? "10"
+        new URLSearchParams(window.location.search).get('perPage') ?? '10',
     );
     const { delete: destroy } = useForm();
 
@@ -49,9 +56,13 @@ export default function Index() {
 
     const handleSynchronize = () => {
         setSyncing(true);
-        router.post(holidays.synchronize.url(), {}, {
-            onFinish: () => setSyncing(false),
-        });
+        router.post(
+            holidays.synchronize.url(),
+            {},
+            {
+                onFinish: () => setSyncing(false),
+            },
+        );
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,21 +74,31 @@ export default function Index() {
         }
 
         timeoutRef.current = setTimeout(() => {
-            router.get(holidays.index().url, { q: value, perPage: pageLength }, {
-                preserveState: true,
-                preserveScroll: true,
-            });
+            router.get(
+                holidays.index().url,
+                { q: value, perPage: pageLength },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            );
         }, 500);
     };
 
-    const handlePageLengthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handlePageLengthChange = (
+        e: React.ChangeEvent<HTMLSelectElement>,
+    ) => {
         const value = e.target.value;
         setPageLength(value);
 
-        router.get(holidays.index().url, { q: search, perPage: value, page: 1 }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            holidays.index().url,
+            { q: search, perPage: value, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
@@ -85,11 +106,12 @@ export default function Index() {
             <Head title="Holidays" />
             <Card className="m-4">
                 <CardHeader>
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>Holidays</CardTitle>
                             <CardDescription>
-                                Showing {list.from} to {list.to} of {list.total} entries
+                                Showing {list.from} to {list.to} of {list.total}{' '}
+                                entries
                             </CardDescription>
                         </div>
                         <div className="space-x-2">
@@ -98,7 +120,9 @@ export default function Index() {
                                 onClick={handleSynchronize}
                                 disabled={syncing}
                             >
-                                {syncing ? 'Syncing...' : 'Sync National Holidays'}
+                                {syncing
+                                    ? 'Syncing...'
+                                    : 'Sync National Holidays'}
                             </Button>
                             <Link href={holidays.create().url}>
                                 <Button>Create Holiday</Button>
@@ -111,7 +135,8 @@ export default function Index() {
                         search={search}
                         pageLength={pageLength}
                         onSearchChange={handleSearchChange}
-                        onPageLengthChange={handlePageLengthChange} />
+                        onPageLengthChange={handlePageLengthChange}
+                    />
                     <Table className="mt-4">
                         <TableHeader>
                             <TableRow>
@@ -119,24 +144,42 @@ export default function Index() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Recurring</TableHead>
-                                <TableHead className="text-center">Action</TableHead>
+                                <TableHead className="text-center">
+                                    Action
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         {list.data.length > 0 && (
                             <TableBody>
                                 {list.data.map((item: Holiday, i: number) => (
                                     <TableRow key={item.id}>
-                                        <TableCell className="font-medium">{list.from + i}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {list.from + i}
+                                        </TableCell>
                                         <TableCell>{item.name}</TableCell>
                                         <TableCell>{item.date}</TableCell>
-                                        <TableCell>{item.is_recurring ? 'Yes' : 'No'}</TableCell>
+                                        <TableCell>
+                                            {item.is_recurring ? 'Yes' : 'No'}
+                                        </TableCell>
                                         <TableCell className="space-x-2 text-center">
                                             <DeleteDialog
                                                 itemName={item.name}
-                                                onConfirm={() => destroy(holidays.destroy.url(item.id))}
+                                                onConfirm={() =>
+                                                    destroy(
+                                                        holidays.destroy.url(
+                                                            item.id,
+                                                        ),
+                                                    )
+                                                }
                                             />
-                                            <Link href={holidays.edit.url(item.id)}>
-                                                <Button className="bg-primary text-white dark:text-black">Edit</Button>
+                                            <Link
+                                                href={holidays.edit.url(
+                                                    item.id,
+                                                )}
+                                            >
+                                                <Button className="bg-primary text-white dark:text-black">
+                                                    Edit
+                                                </Button>
                                             </Link>
                                         </TableCell>
                                     </TableRow>
@@ -146,14 +189,17 @@ export default function Index() {
                         {list.data.length === 0 && (
                             <TableBody>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center">No records.</TableCell>
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center"
+                                    >
+                                        No records.
+                                    </TableCell>
                                 </TableRow>
                             </TableBody>
                         )}
                     </Table>
-                    {list.data.length > 0 && (
-                        <MyPagination data={list} />
-                    )}
+                    {list.data.length > 0 && <MyPagination data={list} />}
                 </CardContent>
             </Card>
         </AppLayout>

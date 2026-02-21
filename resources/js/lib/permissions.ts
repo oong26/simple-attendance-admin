@@ -1,4 +1,4 @@
-import { usePage } from "@inertiajs/react";
+import { usePage } from '@inertiajs/react';
 
 export function usePermission() {
     const user = usePage().props.auth?.user;
@@ -8,7 +8,10 @@ export function usePermission() {
 
     return {
         // Check permission
-        can: (permission: string, userPermissions: string[]|null): boolean => {
+        can: (
+            permission: string,
+            userPermissions: string[] | null,
+        ): boolean => {
             if (userPermissions) {
                 return userPermissions.includes(permission);
             }
@@ -17,7 +20,7 @@ export function usePermission() {
 
         // Check any permission
         canAny: (permissionList: string[]): boolean => {
-            return permissionList.some(p => perms.includes(p));
+            return permissionList.some((p) => perms.includes(p));
         },
 
         // Check role
@@ -27,7 +30,7 @@ export function usePermission() {
 
         // Check if user is superadmin
         isSuperadmin: (): boolean => {
-            return roles.includes("superadmin");
-        }
+            return roles.includes('superadmin');
+        },
     };
 }

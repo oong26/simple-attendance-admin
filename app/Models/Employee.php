@@ -14,7 +14,6 @@ class Employee extends Model
         'email',
         'phone',
         'department_id',
-        'shift_id',
         'face_embedding',
         'photo_url',
         'is_active',
@@ -25,17 +24,12 @@ class Employee extends Model
         'is_active' => 'boolean',
         'grace_period_minutes' => 'integer',
         'department_id' => 'integer',
-        'shift_id' => 'integer',
+        'face_embedding' => 'array',
     ];
 
     public function department()
     {
         return $this->belongsTo(Department::class);
-    }
-
-    public function shift()
-    {
-        return $this->belongsTo(Shift::class);
     }
 
     public function attendances()

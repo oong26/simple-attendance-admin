@@ -1,36 +1,42 @@
 import {
     AlertDialog,
-    AlertDialogTrigger,
+    AlertDialogAction,
+    AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogTitle,
     AlertDialogDescription,
     AlertDialogFooter,
-    AlertDialogCancel,
-    AlertDialogAction
-} from "@/components/ui/alert-dialog";
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface DeleteDialogProps {
-    deleteTitle: string,
+    deleteTitle: string;
     itemName: string;
     onConfirm: () => void;
 }
 
-export default function DeleteDialog({ deleteTitle, itemName, onConfirm }: DeleteDialogProps) {
+export default function DeleteDialog({
+    deleteTitle,
+    itemName,
+    onConfirm,
+}: DeleteDialogProps) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-red-500 text-white">{deleteTitle ? deleteTitle : 'Delete'}</Button>
+                <Button className="bg-red-500 text-white">
+                    {deleteTitle ? deleteTitle : 'Delete'}
+                </Button>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Do you really want to delete <strong>{itemName}</strong>?  
-                        This action cannot be undone.
+                        Do you really want to delete <strong>{itemName}</strong>
+                        ? This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

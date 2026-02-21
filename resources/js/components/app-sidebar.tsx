@@ -11,23 +11,32 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, PackageSearch, UserCog, GlobeLock, Users, KeyRound, Building2, Clock, Calendar, ClipboardList, Settings as SettingsIcon } from 'lucide-react';
-import AppLogo from './app-logo';
-import products from '@/routes/products';
-import users from '@/routes/users';
-import roles from '@/routes/roles';
-import session from '@/routes/session';
-import apiSession from '@/routes/api-session';
 import apiKey from '@/routes/api-keys';
+import apiSession from '@/routes/api-session';
+import attendance from '@/routes/attendance';
+import attendances from '@/routes/attendances';
 import departments from '@/routes/departments';
-import shifts from '@/routes/shifts';
 import employees from '@/routes/employees';
 import holidays from '@/routes/holidays';
-import attendances from '@/routes/attendances';
-import attendance from '@/routes/attendance';
-import settings from '@/routes/settings';
+import roles from '@/routes/roles';
+import session from '@/routes/session';
+import users from '@/routes/users';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
+import {
+    BookOpen,
+    Building2,
+    Calendar,
+    ClipboardList,
+    Folder,
+    GlobeLock,
+    KeyRound,
+    LayoutGrid,
+    Settings as SettingsIcon,
+    UserCog,
+    Users,
+} from 'lucide-react';
+import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
@@ -47,11 +56,6 @@ const mainNavItems: NavItem[] = [
         icon: Building2,
     },
     {
-        title: 'Shifts',
-        href: shifts ? shifts.index() : '#',
-        icon: Clock,
-    },
-    {
         title: 'Employees',
         href: employees ? employees.index() : '#',
         icon: Users,
@@ -67,10 +71,9 @@ const mainNavItems: NavItem[] = [
         icon: ClipboardList,
     },
     {
-        title: 'Products',
-        href: products.index(),
-        icon: PackageSearch,
-        permission: 'products.view',
+        title: 'Monthly Report',
+        href: '/reports/monthly-attendance',
+        icon: Calendar,
     },
     {
         title: 'Users',
@@ -82,8 +85,8 @@ const mainNavItems: NavItem[] = [
 
 const settingNavItems: NavItem[] = [
     {
-        title: 'Global Settings',
-        href: settings ? settings.index() : '#',
+        title: 'Master Late Deductions',
+        href: '/late-deductions',
         icon: SettingsIcon,
     },
     {

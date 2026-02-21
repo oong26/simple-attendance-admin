@@ -10,17 +10,25 @@ import { resolveUrl } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 
-export function NavMain({ items = [], title = '' }: { items: NavItem[], title: string }) {
+export function NavMain({
+    items = [],
+    title = '',
+}: {
+    items: NavItem[];
+    title: string;
+}) {
     const { can } = usePermission();
     const filtered = items.filter(
-        item => !item.permission || can(item.permission)
+        (item) => !item.permission || can(item.permission),
     );
-    
+
     if (filtered.length === 0) return null;
     const page = usePage();
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{title != '' ? title : 'Main Menu'}</SidebarGroupLabel>
+            <SidebarGroupLabel>
+                {title != '' ? title : 'Main Menu'}
+            </SidebarGroupLabel>
             <SidebarMenu>
                 {filtered.map((item) => (
                     <SidebarMenuItem key={item.title}>

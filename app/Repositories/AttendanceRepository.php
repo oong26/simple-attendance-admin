@@ -15,7 +15,7 @@ class AttendanceRepository implements AttendanceInterface {
         $month = $filter['month'] ?? null;
         $employeeId = $filter['employee_id'] ?? null;
 
-        $data = Attendance::with(['employee.department', 'employee.shift'])
+        $data = Attendance::with(['employee.department'])
             ->when($date, function ($query) use ($date) {
                 $query->whereDate('date', $date);
             })
@@ -84,32 +84,34 @@ class AttendanceRepository implements AttendanceInterface {
         $existing = Attendance::where('employee_id', $employeeId)->whereDate('date', $date)->first();
         if ($existing) return $existing;
 
-        $employee = \App\Models\Employee::with('shift')->find($employeeId);
+        $employee = \App\Models\Employee::with('department')->find($employeeId);
         if (!$employee) return null;
 
         // Calculate status
         $status = 'present';
         $lateMinutes = 0;
+        $lateDeduction = 0;
         
-        if ($employee->shift) {
-            $shiftStart = Carbon::parse($employee->shift->start_time);
+        $todayDayName = Carbon::parse($timestamp)->format('l');
+        $workdays = $employee->department?->workdays ?? [];
+        $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
+
+        if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && !empty($todaySchedule['start_time'])) {
+            $shiftStart = Carbon::parse($date . ' ' . $todaySchedule['start_time']);
             $clockIn = Carbon::parse($timestamp);
             
-            // Assuming shift start is on the same day for calculation simplicity, or just comparing times
-            // Need to handle time comparison carefully. 
-            // Simplified logic: compare H:i:s
             $shiftStartSeconds = $shiftStart->secondsSinceMidnight();
             $clockInSeconds = $clockIn->secondsSinceMidnight();
             
-            // Get grace period from settings or employee override
-            // For now, hardcode or fetch setting. 
-            // NOTE: Ideally, we should inject SettingRepository or similar, but for now simple fetch using Model or DB
             $globalGrace = \App\Models\Setting::where('key', 'grace_period')->value('value') ?? 15;
             $graceContext = $employee->grace_period_override ?? $globalGrace;
             
             if ($clockInSeconds > ($shiftStartSeconds + ($graceContext * 60))) {
                 $status = 'late';
                 $lateMinutes = floor(($clockInSeconds - $shiftStartSeconds) / 60);
+                
+                $deductionRate = \App\Models\LateDeductionRule::where('is_active', true)->value('amount_per_minute') ?? \App\Models\Setting::where('key', 'late_deduction_per_minute')->value('value') ?? 0;
+                $lateDeduction = $lateMinutes * intval($deductionRate);
             }
         }
 
@@ -119,6 +121,7 @@ class AttendanceRepository implements AttendanceInterface {
             'clock_in_time' => $timestamp,
             'status' => $status,
             'late_minutes' => $lateMinutes,
+            'late_deduction' => $lateDeduction,
         ]);
     }
 

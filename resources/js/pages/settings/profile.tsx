@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit } from '@/routes/profile';
 import { usePermission } from '@/lib/permissions';
+import { edit } from '@/routes/profile';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -143,9 +143,7 @@ export default function Profile({
                     </Form>
                 </div>
 
-                {can("settings.profile.delete") && (
-                    <DeleteUser />
-                )}
+                {can('settings.profile.delete') && <DeleteUser />}
             </SettingsLayout>
         </AppLayout>
     );

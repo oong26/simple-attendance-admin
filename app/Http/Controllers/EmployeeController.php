@@ -15,8 +15,7 @@ class EmployeeController extends Controller
 {
     public function __construct(
         protected EmployeeInterface $employee,
-        protected DepartmentInterface $department,
-        protected ShiftInterface $shift
+        protected DepartmentInterface $department
     ) {}
 
     public function index(Request $request)
@@ -39,7 +38,6 @@ class EmployeeController extends Controller
     {
         return Inertia::render('employees/create', [
             'departments' => $this->department->list([], false),
-            'shifts' => $this->shift->list([], false),
         ]);
     }
 
@@ -53,6 +51,7 @@ class EmployeeController extends Controller
                 'department_id' => 'nullable|exists:departments,id',
                 'shift_id' => 'nullable|exists:shifts,id',
                 'photo' => 'nullable|image|max:2048', // 2MB Max
+                'face_embedding' => 'nullable|array',
                 'grace_period_minutes' => 'nullable|integer|min:0',
                 'is_active' => 'boolean',
             ]);
@@ -75,7 +74,6 @@ class EmployeeController extends Controller
             return Inertia::render('employees/edit', [
                 'employee' => $employee,
                 'departments' => $this->department->list([], false),
-                'shifts' => $this->shift->list([], false),
             ]);
         } catch (Exception $e) {
              return redirect()->route('employees.index')->with('flash', $this->flashMessage('error'));
@@ -92,6 +90,7 @@ class EmployeeController extends Controller
                 'department_id' => 'nullable|exists:departments,id',
                 'shift_id' => 'nullable|exists:shifts,id',
                 'photo' => 'nullable|image|max:2048',
+                'face_embedding' => 'nullable|array',
                 'grace_period_minutes' => 'nullable|integer|min:0',
                 'is_active' => 'boolean',
             ]);
@@ -116,6 +115,103 @@ class EmployeeController extends Controller
         } catch (Exception $e) {
             Log::error('Employee Destroy Error: ' . $e->getMessage());
             return back()->with('flash', $this->flashMessage('error'));
+        }
+    }
+
+    public function updateFace(Request $request, string $id)
+    {
+        try {
+            $validated = $request->validate([
+                'photo' => 'nullable|image|max:2048',
+                'face_embedding' => 'required|array',
+            ]);
+
+            $photo = $request->file('photo');
+            $this->employee->update($id, $validated, $photo);
+
+            return back()->with('flash', $this->flashMessage('success', 'Employee face recorded successfully.'));
+        } catch (Exception $e) {
+            Log::error('Employee Update Face Error: ' . $e->getMessage());
+            return back()->with('flash', $this->flashMessage('error', 'Failed to record face.'));
+        }
+    }
+
+    public function verifyFace(Request $request, string $id)
+    {
+        try {
+            $request->validate([
+                'face_embedding' => 'required|array',
+            ]);
+
+            $employee = $this->employee->getById($id);
+            if (!$employee || !$employee->face_embedding) {
+                return back()->with('flash', $this->flashMessage('error', 'Face not registered for this employee'));
+            }
+
+            $inputEmbedding = $request->face_embedding;
+            $dbEmbedding = $employee->face_embedding;
+
+            $distance = 0;
+            for ($i = 0; $i < 128; $i++) {
+                $distance += pow((float)$inputEmbedding[$i] - (float)$dbEmbedding[$i], 2);
+            }
+            $distance = sqrt($distance);
+
+            if ($distance <= 0.45) {
+                return back()->with('flash', $this->flashMessage('success', 'Face Verified Successfully! (Distance: ' . round($distance, 4) . ')'));
+            } else {
+                return back()->with('flash', $this->flashMessage('error', 'Face Does Not Match! (Distance: ' . round($distance, 4) . ')'));
+            }
+        } catch (Exception $e) {
+            Log::error('Employee Verify Face Error: ' . $e->getMessage());
+            return back()->with('flash', $this->flashMessage('error', 'Server Error.'));
+        }
+    }
+
+    public function verifyFaceGlobal(Request $request)
+    {
+        try {
+            $request->validate([
+                'face_embedding' => 'required|array',
+            ]);
+
+            $inputEmbedding = $request->face_embedding;
+            
+            // Get all active employees with face embeddings
+            // Since we're using a repository, we need to fetch the raw models or ensure the repo returns the embedding.
+            // A quick fallback is to query the model directly for this specific matching logic.
+            $employees = \App\Models\Employee::where('is_active', true)->whereNotNull('face_embedding')->get();
+            
+            $bestMatch = null;
+            $bestDistance = 1.0; // Initialize with a distance higher than our threshold
+            $threshold = 0.45;
+
+            foreach ($employees as $employee) {
+                $dbEmbedding = $employee->face_embedding;
+                
+                if (is_array($dbEmbedding) && count($dbEmbedding) === 128) {
+                    $distance = 0;
+                    for ($i = 0; $i < 128; $i++) {
+                        $distance += pow((float)$inputEmbedding[$i] - (float)$dbEmbedding[$i], 2);
+                    }
+                    $distance = sqrt($distance);
+
+                    if ($distance < $bestDistance) {
+                        $bestDistance = $distance;
+                        $bestMatch = $employee;
+                    }
+                }
+            }
+
+            if ($bestMatch && $bestDistance <= $threshold) {
+                $bestMatch->load('department', 'shift');
+                return back()->with('flash', $this->flashMessage('success', 'Face Match Found: ' . $bestMatch->name . ' (Distance: ' . round($bestDistance, 4) . ')'))->with('matched_employee', $bestMatch);
+            } else {
+                return back()->with('flash', $this->flashMessage('error', 'No matching face found globally.'));
+            }
+        } catch (Exception $e) {
+            Log::error('Employee Global Face Verify Error: ' . $e->getMessage());
+            return back()->with('flash', $this->flashMessage('error', 'Server Error during global verification.'));
         }
     }
 }

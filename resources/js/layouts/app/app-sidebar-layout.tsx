@@ -5,7 +5,13 @@ import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { CheckCircle2Icon, CircleAlertIcon, CircleX, Info, X } from 'lucide-react';
+import {
+    CheckCircle2Icon,
+    CircleAlertIcon,
+    CircleX,
+    Info,
+    X,
+} from 'lucide-react';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 
 export default function AppSidebarLayout({
@@ -20,17 +26,16 @@ export default function AppSidebarLayout({
         }
     }, [flash?.message]);
 
-
     const getAlertStyles = () => {
         switch (flash?.type) {
             case 'success':
-                return "border-green-500 text-green-700";
+                return 'border-green-500 text-green-700';
             case 'warning':
-                return "border-yellow-500 text-yellow-700";
+                return 'border-yellow-500 text-yellow-700';
             case 'error':
-                return "border-red-500 text-red-700";
+                return 'border-red-500 text-red-700';
             default:
-                return "";
+                return '';
         }
     };
 
@@ -53,19 +58,19 @@ export default function AppSidebarLayout({
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {showAlert && flash && flash.message && (
-                    <div className="m-4 relative">
+                    <div className="relative m-4">
                         <Alert className={getAlertStyles()}>
                             {getIcon()}
                             <AlertTitle>
-                                {flash.type === 'success' && "Success"}
-                                {flash.type === 'warning' && "Warning"}
-                                {flash.type === 'error' && "Error"}
+                                {flash.type === 'success' && 'Success'}
+                                {flash.type === 'warning' && 'Warning'}
+                                {flash.type === 'error' && 'Error'}
                             </AlertTitle>
                             <AlertDescription>{flash.message}</AlertDescription>
-                            
+
                             {/* Close button */}
                             <button
-                                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground hover:cursor-pointer"
+                                className="absolute top-3 right-3 text-muted-foreground hover:cursor-pointer hover:text-foreground"
                                 onClick={() => setShowAlert(false)}
                             >
                                 <X className="h-4 w-4" />

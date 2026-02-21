@@ -24,7 +24,7 @@ class AttendanceController extends Controller
             $employeeId = $request->get('employee_id');
             $perPage = $request->get('perPage', 20);
             
-            $query = Attendance::with(['employee.department', 'employee.shift']);
+            $query = Attendance::with(['employee.department']);
 
             if ($month) {
                 $query->where('date', 'like', "{$month}%");
@@ -58,7 +58,7 @@ class AttendanceController extends Controller
             $totalEmployees = Employee::where('is_active', true)->count();
 
             // Get today's attendance
-            $attendances = Attendance::with('employee.department', 'employee.shift')
+            $attendances = Attendance::with('employee.department')
                 ->where('date', $today)
                 ->get();
 
@@ -70,7 +70,7 @@ class AttendanceController extends Controller
             // Or we can list specific employees who are not in.
             $clockedInEmployeeIds = $attendances->pluck('employee_id')->toArray();
             
-            $notInEmployees = Employee::with(['department', 'shift'])
+            $notInEmployees = Employee::with(['department'])
                 ->where('is_active', true)
                 ->whereNotIn('id', $clockedInEmployeeIds)
                 ->get();

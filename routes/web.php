@@ -1,17 +1,19 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiKeyController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DeductionSettingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Systems\ApiSessionController;
 use App\Http\Controllers\Systems\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LateDeductionRuleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,18 +22,16 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     // Departments
     Route::resource('departments', DepartmentController::class);
 
-    // Shifts
-    Route::resource('shifts', ShiftController::class);
-
     // Employees
     Route::resource('employees', EmployeeController::class);
+    Route::post('employees/{employee}/face', [EmployeeController::class, 'updateFace'])->name('employees.update-face');
+    Route::post('employees/{employee}/verify-face', [EmployeeController::class, 'verifyFace'])->name('employees.verify-face');
+    Route::post('employees/verify-face-global', [EmployeeController::class, 'verifyFaceGlobal'])->name('employees.verify-face-global');
 
     // Holidays
     Route::resource('holidays', HolidayController::class);
@@ -42,35 +42,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('attendance/monitor', [AttendanceController::class, 'monitor'])->name('attendance.monitor');
 
-    // Settings
-    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    // Late Deduction
+    Route::resource('late-deductions', LateDeductionRuleController::class)->except(['create', 'show', 'edit']);
 
-    Route::prefix('products')
-        ->name('products.')
+    // Reports
+    Route::prefix('reports')
+        ->name('reports.')
         ->group(function () {
-            Route::get('', [ProductController::class, 'index'])
-                ->middleware('permission:products.view')
-                ->name('index');
-            Route::get('/create', [ProductController::class, 'create'])
-                ->middleware('permission:products.create')
-                ->name('create');
-            Route::post('', [ProductController::class, 'store'])
-                ->middleware('permission:products.create')
-                ->name('store');
-            Route::get('/{product}', [ProductController::class, 'show'])
-                ->middleware('permission:products.view')
-                ->name('show');
-            Route::get('/{product}/edit', [ProductController::class, 'edit'])
-                ->middleware('permission:products.edit')
-                ->name('edit');
-            Route::put('/{product}', [ProductController::class, 'update'])
-                ->middleware('permission:products.edit')
-                ->name('update');
-            Route::delete('/{product}', [ProductController::class, 'destroy'])
-                ->middleware('permission:products.delete')
-                ->name('destroy');
+            Route::get('monthly-attendance', [ReportController::class, 'monthlyAttendance'])
+                ->name('monthly-attendance');
         });
+
+    // Users
     Route::prefix('users')
         ->name('users.')
         ->group(function () {
@@ -96,6 +79,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->middleware('permission:users.delete')
                 ->name('destroy');
         });
+
+    // Roles
     Route::prefix('roles')
         ->name('roles.')
         ->group(function () {
@@ -121,6 +106,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->middleware('permission:roles.delete')
                 ->name('destroy');
         });
+
+    // API Keys
     Route::prefix('api-keys')
         ->name('api-keys.')
         ->group(function () {

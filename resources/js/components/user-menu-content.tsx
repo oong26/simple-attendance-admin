@@ -21,11 +21,11 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
     const { can, canAny } = usePermission();
     const settingPermissions = [
-        "settings.profile.view",
-        "settings.profile.update",
-        "settings.password.update",
-        "settings.2fa",
-        "settings.appearance.update"
+        'settings.profile.view',
+        'settings.profile.update',
+        'settings.password.update',
+        'settings.2fa',
+        'settings.appearance.update',
     ];
 
     const handleLogout = () => {
@@ -40,24 +40,22 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     <UserInfo user={user} showEmail={true} />
                 </div>
             </DropdownMenuLabel>
-            {canAny(settingPermissions) && (
-                <DropdownMenuSeparator />
-            )}
+            {canAny(settingPermissions) && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
                 {canAny(settingPermissions) && (
-                        <DropdownMenuItem asChild>
-                            <Link
-                                className="block w-full"
-                                href={index.url()}
-                                as="button"
-                                prefetch
-                                onClick={cleanup}
-                            >
-                                <Settings className="mr-2" />
-                                Settings
-                            </Link>
-                        </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full"
+                            href={index.url()}
+                            as="button"
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <Settings className="mr-2" />
+                            Settings
+                        </Link>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

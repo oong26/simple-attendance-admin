@@ -10,7 +10,7 @@ class EmployeeRepository implements EmployeeInterface {
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
-        $data = Employee::with(['department', 'shift'])
+        $data = Employee::with(['department'])
             ->when($name, function ($query) use ($name) {
                 $query->where('name', 'LIKE', "%$name%")
                       ->orWhere('email', 'LIKE', "%$name%");
@@ -33,7 +33,7 @@ class EmployeeRepository implements EmployeeInterface {
 
     public function getById($id): object|null
     {
-        return Employee::with(['department', 'shift'])->find($id);
+        return Employee::with(['department'])->find($id);
     }
 
     public function update($id, $form, $photo = null): Employee|null

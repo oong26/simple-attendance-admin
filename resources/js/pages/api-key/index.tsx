@@ -8,10 +8,17 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import MyPagination from '@/components/ui/my-pagination';
 import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { usePermission } from '@/lib/permissions';
 import apiKeys from '@/routes/api-keys';
@@ -27,38 +34,38 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface ApiKey {
-    id: number,
-    name: string,
-    key: string,
-    state: boolean,
+    id: number;
+    name: string;
+    key: string;
+    state: boolean;
 }
 
 interface LinkProps {
-    active: boolean,
-    label: string,
-    page: number,
-    url: string
+    active: boolean;
+    label: string;
+    page: number;
+    url: string;
 }
 
 interface ProductPagination {
-    data: ApiKey[],
-    links: LinkProps[],
-    from: number,
-    to: number
+    data: ApiKey[];
+    links: LinkProps[];
+    from: number;
+    to: number;
 }
 
 interface PageProps {
-    list: ProductPagination,
-    q: string | null
+    list: ProductPagination;
+    q: string | null;
 }
 
 export default function Index() {
-    const {list, q} = usePage().props as PageProps;
+    const { list, q } = usePage().props as PageProps;
     const [search, setSearch] = useState(q ?? '');
     const [pageLength, setPageLength] = useState(
-        new URLSearchParams(window.location.search).get("perPage") ?? "10"
+        new URLSearchParams(window.location.search).get('perPage') ?? '10',
     );
-    const {processing, delete: destroy} = useForm();
+    const { processing, delete: destroy } = useForm();
     const [loadingId, setLoadingId] = useState<number | null>(null);
     const { can, canAny } = usePermission();
 
@@ -75,30 +82,44 @@ export default function Index() {
 
         // Set new timeout (delay for 500 milliseconds)
         timeoutRef.current = setTimeout(() => {
-            router.get('', { q: value, perPage: pageLength }, {
-                preserveState: true,
-                preserveScroll: true,
-            });
+            router.get(
+                '',
+                { q: value, perPage: pageLength },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            );
         }, 500);
     };
 
-    const handlePageLengthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handlePageLengthChange = (
+        e: React.ChangeEvent<HTMLSelectElement>,
+    ) => {
         const value = e.target.value;
         setPageLength(value);
 
-        router.get('', { q: search, perPage: value, page: 1 }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            '',
+            { q: search, perPage: value, page: 1 },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     const handleToggle = (id: number) => {
         setLoadingId(id);
 
-        router.patch(apiKeys.toggle(id), {}, {
-            preserveScroll: true,
-            onFinish: () => setLoadingId(null),
-        });
+        router.patch(
+            apiKeys.toggle(id),
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setLoadingId(null),
+            },
+        );
     };
 
     return (
@@ -123,15 +144,21 @@ export default function Index() {
                         search={search}
                         pageLength={pageLength}
                         onSearchChange={handleSearchChange}
-                        onPageLengthChange={handlePageLengthChange} />
+                        onPageLengthChange={handlePageLengthChange}
+                    />
                     <Table className="mt-4">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[50px]">#</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>State</TableHead>
-                                {canAny(['api-keys.edit', 'api-keys.delete']) && (
-                                    <TableHead className="text-center">Action</TableHead>
+                                {canAny([
+                                    'api-keys.edit',
+                                    'api-keys.delete',
+                                ]) && (
+                                    <TableHead className="text-center">
+                                        Action
+                                    </TableHead>
                                 )}
                             </TableRow>
                         </TableHeader>
@@ -139,35 +166,64 @@ export default function Index() {
                             <TableBody>
                                 {list.data.map((item, i) => (
                                     <TableRow key={item.id}>
-                                        <TableCell className="font-medium">{list.from + i}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {list.from + i}
+                                        </TableCell>
                                         <TableCell>{item.name}</TableCell>
-                                        <TableCell>{(
-                                            <Switch
-                                                checked={item.state}
-                                                onCheckedChange={() => handleToggle(item.id)}
-                                                disabled={loadingId === item.id}
-                                            />
-                                        )}</TableCell>
+                                        <TableCell>
+                                            {
+                                                <Switch
+                                                    checked={item.state}
+                                                    onCheckedChange={() =>
+                                                        handleToggle(item.id)
+                                                    }
+                                                    disabled={
+                                                        loadingId === item.id
+                                                    }
+                                                />
+                                            }
+                                        </TableCell>
                                         <TableCell className="space-x-2 text-center">
                                             {can('api-keys.edit') && (
                                                 <DeleteDialog
                                                     itemName={item.name}
-                                                    onConfirm={() => destroy(apiKeys.destroy.url(item.id))}/>
+                                                    onConfirm={() =>
+                                                        destroy(
+                                                            apiKeys.destroy.url(
+                                                                item.id,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
                                             )}
                                             {can('api-keys.edit') && (
                                                 <>
                                                     <Button
                                                         className="bg-yellow-500 text-white"
                                                         onClick={() => {
-                                                            if (confirm("Regenerate this API Key?")) {
-                                                                router.put(apiKeys.regenerate.url(item.id));
+                                                            if (
+                                                                confirm(
+                                                                    'Regenerate this API Key?',
+                                                                )
+                                                            ) {
+                                                                router.put(
+                                                                    apiKeys.regenerate.url(
+                                                                        item.id,
+                                                                    ),
+                                                                );
                                                             }
                                                         }}
                                                     >
                                                         Regenerate
                                                     </Button>
-                                                    <Link href={apiKeys.edit.url(item.id)}>
-                                                        <Button className="bg-primary text-white dark:text-black">Edit</Button>
+                                                    <Link
+                                                        href={apiKeys.edit.url(
+                                                            item.id,
+                                                        )}
+                                                    >
+                                                        <Button className="bg-primary text-white dark:text-black">
+                                                            Edit
+                                                        </Button>
                                                     </Link>
                                                 </>
                                             )}
@@ -179,16 +235,25 @@ export default function Index() {
                         {list.data.length == 0 && (
                             <TableBody>
                                 <TableRow>
-                                    <TableCell colSpan={canAny(['api-keys.edit', 'api-keys.delete']) ? 4 : 3}
-                                        className="text-center">No records.</TableCell>
+                                    <TableCell
+                                        colSpan={
+                                            canAny([
+                                                'api-keys.edit',
+                                                'api-keys.delete',
+                                            ])
+                                                ? 4
+                                                : 3
+                                        }
+                                        className="text-center"
+                                    >
+                                        No records.
+                                    </TableCell>
                                 </TableRow>
                             </TableBody>
                         )}
                     </Table>
                     {/* Pagination */}
-                    {list.data.length > 0 && (
-                        <MyPagination data={list} />
-                    )}
+                    {list.data.length > 0 && <MyPagination data={list} />}
                 </CardContent>
             </Card>
         </AppLayout>

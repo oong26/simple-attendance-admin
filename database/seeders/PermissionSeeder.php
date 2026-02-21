@@ -17,12 +17,6 @@ class PermissionSeeder extends Seeder
             // Dashboard
             'dashboard.view',
 
-            // Products
-            'products.view',
-            'products.create',
-            'products.edit',
-            'products.delete',
-
             // Users
             'users.view',
             'users.create',

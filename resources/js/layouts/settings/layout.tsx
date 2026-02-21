@@ -48,7 +48,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     // Filter items based on permissions
     const filteredItems = sidebarNavItems.filter(
-        item => !item.permission || can(item.permission, userPermissions)
+        (item) => !item.permission || can(item.permission, userPermissions),
     );
 
     const currentPath = window.location.pathname;
@@ -63,7 +63,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             <div className="flex flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav className="flex flex-col space-y-1 space-x-0">
-
                         {filteredItems.map((item, index) => (
                             <Button
                                 key={`${resolveUrl(item.href)}-${index}`}
@@ -71,7 +70,10 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': isSameUrl(currentPath, item.href),
+                                    'bg-muted': isSameUrl(
+                                        currentPath,
+                                        item.href,
+                                    ),
                                 })}
                             >
                                 <Link href={item.href}>
@@ -82,7 +84,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 </Link>
                             </Button>
                         ))}
-
                     </nav>
                 </aside>
 

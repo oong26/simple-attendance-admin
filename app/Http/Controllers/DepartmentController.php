@@ -10,10 +10,9 @@ use Exception;
 
 class DepartmentController extends Controller
 {
-    public function __construct(protected DepartmentInterface $department)
-    {
-        // Add permissions middleware if needed
-    }
+    public function __construct(
+        protected DepartmentInterface $department
+    ) {}
 
     public function index(Request $request)
     {
@@ -41,6 +40,11 @@ class DepartmentController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:departments,name',
+                'workdays' => 'nullable|array',
+                'workdays.*.day' => 'required|string|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+                'workdays.*.is_working' => 'required|boolean',
+                'workdays.*.start_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
+                'workdays.*.end_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
             ]);
 
             $this->department->store($validated);
@@ -57,7 +61,9 @@ class DepartmentController extends Controller
     {
         try {
             $department = $this->department->getById($id);
-            return Inertia::render('departments/edit', compact('department'));
+            return Inertia::render('departments/edit', [
+                'department' => $department
+            ]);
         } catch (Exception $e) {
              return redirect()->route('departments.index')->with('flash', $this->flashMessage('error'));
         }
@@ -68,6 +74,11 @@ class DepartmentController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:departments,name,' . $id,
+                'workdays' => 'nullable|array',
+                'workdays.*.day' => 'required|string|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+                'workdays.*.is_working' => 'required|boolean',
+                'workdays.*.start_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
+                'workdays.*.end_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
             ]);
 
             $this->department->update($id, $validated);

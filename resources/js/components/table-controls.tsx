@@ -1,9 +1,9 @@
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     NativeSelect,
     NativeSelectOption,
-} from "@/components/ui/native-select";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/native-select';
 
 interface Props {
     search: string;

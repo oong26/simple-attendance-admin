@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Interfaces\SettingInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use App\Models\Setting;
 
 class SettingController extends Controller
 {
@@ -28,6 +28,7 @@ class SettingController extends Controller
         try {
             $validated = $request->validate([
                 'global_grace_period' => 'required|integer|min:0',
+                'late_deduction_per_minute' => 'required|integer|min:0',
             ]);
 
             foreach ($validated as $key => $value) {

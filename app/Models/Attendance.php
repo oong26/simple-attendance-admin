@@ -16,11 +16,13 @@ class Attendance extends Model
         'clock_out_time',
         'status',
         'late_minutes',
+        'late_deduction',
     ];
 
     protected $casts = [
         'date' => 'date',
         'late_minutes' => 'integer',
+        'late_deduction' => 'integer',
         'employee_id' => 'integer',
     ];
 

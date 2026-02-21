@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
-use App\Models\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use App\Interfaces\AttendanceInterface;
 
 class AttendanceController extends Controller
 {
+    public function __construct(protected AttendanceInterface $attendance) {}
     /**
      * Reporting & History
      */
@@ -22,6 +23,7 @@ class AttendanceController extends Controller
             $date = $request->get('date', Carbon::today()->toDateString());
             $month = $request->get('month'); // YYYY-MM
             $employeeId = $request->get('employee_id');
+            $status = $request->get('status');
             $perPage = $request->get('perPage', 20);
             
             $query = Attendance::with(['employee.department']);
@@ -36,13 +38,36 @@ class AttendanceController extends Controller
                 $query->where('employee_id', $employeeId);
             }
 
+            if ($status) {
+                $query->where('status', $status);
+            }
+
             $list = $query->latest('date')->latest('clock_in_time')->paginate($perPage);
             $employees = Employee::orderBy('name')->get(['id', 'name']);
 
-            return Inertia::render('attendances/index', compact('list', 'date', 'month', 'employees'));
+            return Inertia::render('attendances/index', compact('list', 'date', 'month', 'status', 'employees'));
         } catch (Exception $e) {
             Log::error('Attendance Index Error: ' . $e->getMessage());
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
+        }
+    }
+
+    /**
+     * Delete method
+     */
+    public function destroy($id)
+    {
+        try {
+            $this->attendance->delete($id);
+
+            return redirect()
+                ->route('attendances.index')
+                ->with('flash', $this->flashMessage('success', 'Successfully deleting attendance'));
+        }
+        catch (Exception $e) {
+            return redirect()
+                ->route('attendances.index')
+                ->with('flash', $this->flashMessage('error'));
         }
     }
 
@@ -86,6 +111,60 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             Log::error('Attendance Monitor Error: ' . $e->getMessage());
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
+        }
+    }
+
+    /**
+     * Create Leave Request
+     */
+    public function create()
+    {
+        $employees = Employee::orderBy('name')->where('is_active', true)->get(['id', 'name']);
+        $holidays = \App\Models\Holiday::all(['date', 'name'])->map(function ($holiday) {
+            return [
+                'date' => Carbon::parse($holiday->date)->format('Y-m-d'),
+                'name' => $holiday->name
+            ];
+        });
+        return Inertia::render('attendances/leave', compact('employees', 'holidays'));
+    }
+
+    /**
+     * Store Leave Request
+     */
+    public function storeLeave(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'date' => 'required|date',
+            'note' => 'nullable|string',
+        ]);
+
+        $isHoliday = \App\Models\Holiday::whereDate('date', $validated['date'])->first();
+        if ($isHoliday) {
+            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: ' . $isHoliday->name]);
+        }
+
+        try {
+            $this->attendance->store([
+                'employee_id' => $validated['employee_id'],
+                'date' => $validated['date'],
+                'status' => 'leave',
+                'note' => $validated['note'] ?? null,
+                'clock_in_time' => null,
+                'clock_out_time' => null,
+                'late_minutes' => 0,
+                'late_deduction' => 0,
+            ]);
+
+            return redirect()
+                ->route('attendances.index')
+                ->with('flash', $this->flashMessage('success', 'Successfully submitted leave request.'));
+        } catch (Exception $e) {
+            Log::error('Attendance Store Leave Error: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('flash', $this->flashMessage('error', 'Failed to submit leave request.'));
         }
     }
 }

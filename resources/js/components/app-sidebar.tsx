@@ -66,7 +66,7 @@ const mainNavItems: NavItem[] = [
         icon: Calendar,
     },
     {
-        title: 'Attendance History',
+        title: 'Attendance',
         href: attendances ? attendances.index() : '#',
         icon: ClipboardList,
     },

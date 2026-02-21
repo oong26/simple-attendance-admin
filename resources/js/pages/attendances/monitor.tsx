@@ -46,7 +46,7 @@ interface Attendance {
 }
 
 interface NotInEmployee {
-    id: number;
+    id: string;
     name: string;
     photo_url: string | null;
     department: { name: string } | null;

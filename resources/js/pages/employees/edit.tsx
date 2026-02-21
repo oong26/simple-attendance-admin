@@ -34,7 +34,11 @@ export default function Edit() {
         email: employee.email ?? '',
         phone: employee.phone ?? '',
         department_id: employee.department_id ?? '',
+        contract_type: employee.contract_type ?? '',
+        attendance_type: employee.attendance_type ?? '',
+        contract_end_date: employee.contract_end_date ? employee.contract_end_date.split('T')[0] : '', // Get YYYY-MM-DD
         photo: null as File | null,
+        face_photo: null as File | null,
         face_embedding: null as number[] | null,
         grace_period_minutes: employee.grace_period_minutes ?? '',
         is_active: !!employee.is_active,
@@ -45,7 +49,7 @@ export default function Edit() {
     const handleFaceCapture = (file: File, embedding: number[]) => {
         setData((data) => ({
             ...data,
-            photo: file,
+            face_photo: file,
             face_embedding: embedding,
         }));
     };
@@ -162,19 +166,118 @@ export default function Edit() {
                                     </p>
                                 )}
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="contract_type">
+                                    Contract Type
+                                </Label>
+                                <NativeSelect
+                                    id="contract_type"
+                                    value={data.contract_type}
+                                    onChange={(e) =>
+                                        setData('contract_type', e.target.value)
+                                    }
+                                >
+                                    <NativeSelectOption value="">
+                                        Select Contract Type
+                                    </NativeSelectOption>
+                                    <NativeSelectOption value="full_time">Full Time</NativeSelectOption>
+                                    <NativeSelectOption value="part_time">Part Time</NativeSelectOption>
+                                    <NativeSelectOption value="contract">Contract</NativeSelectOption>
+                                    <NativeSelectOption value="internship">Internship</NativeSelectOption>
+                                </NativeSelect>
+                                {errors.contract_type && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.contract_type}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="photo">
-                                Photo & Face Recognition
-                            </Label>
-                            {employee.photo_url && !data.photo && (
-                                <div className="mb-2 flex items-center gap-4">
-                                    <img
-                                        src={employee.photo_url}
-                                        alt="Current"
-                                        className="h-20 w-20 rounded object-cover"
-                                    />
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="attendance_type">
+                                    Attendance Type
+                                </Label>
+                                <NativeSelect
+                                    id="attendance_type"
+                                    value={data.attendance_type}
+                                    onChange={(e) =>
+                                        setData('attendance_type', e.target.value)
+                                    }
+                                >
+                                    <NativeSelectOption value="">
+                                        Select Attendance Type
+                                    </NativeSelectOption>
+                                    <NativeSelectOption value="onsite">On-site</NativeSelectOption>
+                                    <NativeSelectOption value="remote">Remote</NativeSelectOption>
+                                    <NativeSelectOption value="hybrid">Hybrid</NativeSelectOption>
+                                </NativeSelect>
+                                {errors.attendance_type && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.attendance_type}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="contract_end_date">
+                                    Contract End Date
+                                </Label>
+                                <Input
+                                    id="contract_end_date"
+                                    type="date"
+                                    value={data.contract_end_date}
+                                    onChange={(e) =>
+                                        setData('contract_end_date', e.target.value)
+                                    }
+                                />
+                                {errors.contract_end_date && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.contract_end_date}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="photo">Employee Photo</Label>
+                                {employee.photo_url && !data.photo && (
+                                    <div className="mb-2">
+                                        <img
+                                            src={employee.photo_url}
+                                            alt="Current"
+                                            className="h-20 w-20 rounded object-cover"
+                                        />
+                                    </div>
+                                )}
+                                <Input
+                                    id="photo"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setData(
+                                            'photo',
+                                            e.target.files
+                                                ? e.target.files[0]
+                                                : null,
+                                        )
+                                    }
+                                />
+                                {data.photo && (
+                                    <p className="mt-1 text-sm text-green-600">
+                                        New photo selected.
+                                    </p>
+                                )}
+                                {errors.photo && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.photo}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Face Recognition</Label>
+                                <div className="mb-2">
                                     {employee.face_embedding ? (
                                         <span className="text-sm text-green-600">
                                             ✓ Face template is registered.
@@ -185,53 +288,29 @@ export default function Edit() {
                                         </span>
                                     )}
                                 </div>
-                            )}
-                            <div className="flex items-center space-x-4">
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    onClick={() => setIsFaceCaptureOpen(true)}
-                                >
-                                    Record New Face (Webcam)
-                                </Button>
-                                {data.photo && (
-                                    <span className="text-sm text-green-600">
-                                        New photo captured.
-                                    </span>
-                                )}
-                                {data.face_embedding && (
-                                    <span className="text-sm text-green-600">
-                                        New face indexed.
-                                    </span>
+                                <div className="flex items-center space-x-4">
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        onClick={() => setIsFaceCaptureOpen(true)}
+                                    >
+                                        Record New Face (Webcam)
+                                    </Button>
+                                    {data.face_embedding && (
+                                        <span className="text-sm text-green-600">
+                                            New face indexed.
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Required for clocking in via face recognition.
+                                </p>
+                                {errors.face_embedding && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.face_embedding}
+                                    </p>
                                 )}
                             </div>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Alternatively, you can upload a photo (but face
-                                matching requires webcam capture):
-                            </p>
-                            <Input
-                                id="photo"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) =>
-                                    setData(
-                                        'photo',
-                                        e.target.files
-                                            ? e.target.files[0]
-                                            : null,
-                                    )
-                                }
-                            />
-                            {errors.photo && (
-                                <p className="text-sm text-red-500">
-                                    {errors.photo}
-                                </p>
-                            )}
-                            {errors.face_embedding && (
-                                <p className="text-sm text-red-500">
-                                    {errors.face_embedding}
-                                </p>
-                            )}
                         </div>
 
                         <div className="space-y-2">

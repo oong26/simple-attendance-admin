@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\DepartmentInterface;
 use App\Interfaces\EmployeeInterface;
-use App\Interfaces\ShiftInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
@@ -49,15 +48,19 @@ class EmployeeController extends Controller
                 'email' => 'nullable|email|max:255|unique:employees,email',
                 'phone' => 'nullable|string|max:20',
                 'department_id' => 'nullable|exists:departments,id',
-                'shift_id' => 'nullable|exists:shifts,id',
                 'photo' => 'nullable|image|max:2048', // 2MB Max
+                'face_photo' => 'nullable|image|max:2048',
                 'face_embedding' => 'nullable|array',
+                'contract_type' => 'nullable|in:full_time,part_time,contract,internship',
+                'attendance_type' => 'nullable|in:onsite,remote,hybrid',
+                'contract_end_date' => 'nullable|date',
                 'grace_period_minutes' => 'nullable|integer|min:0',
                 'is_active' => 'boolean',
             ]);
 
             $photo = $request->file('photo');
-            $this->employee->store($validated, $photo);
+            $facePhoto = $request->file('face_photo');
+            $this->employee->store($validated, $photo, $facePhoto);
 
             return redirect()->route('employees.index')
                 ->with('flash', $this->flashMessage('success', 'Employee created successfully.'));
@@ -88,15 +91,19 @@ class EmployeeController extends Controller
                 'email' => 'nullable|email|max:255|unique:employees,email,' . $id,
                 'phone' => 'nullable|string|max:20',
                 'department_id' => 'nullable|exists:departments,id',
-                'shift_id' => 'nullable|exists:shifts,id',
                 'photo' => 'nullable|image|max:2048',
+                'face_photo' => 'nullable|image|max:2048',
                 'face_embedding' => 'nullable|array',
+                'contract_type' => 'nullable|in:full_time,part_time,contract,internship',
+                'attendance_type' => 'nullable|in:onsite,remote,hybrid',
+                'contract_end_date' => 'nullable|date',
                 'grace_period_minutes' => 'nullable|integer|min:0',
                 'is_active' => 'boolean',
             ]);
 
             $photo = $request->file('photo');
-            $this->employee->update($id, $validated, $photo);
+            $facePhoto = $request->file('face_photo');
+            $this->employee->update($id, $validated, $photo, $facePhoto);
 
             return redirect()->route('employees.index')
                 ->with('flash', $this->flashMessage('success', 'Employee updated successfully.'));
@@ -126,8 +133,8 @@ class EmployeeController extends Controller
                 'face_embedding' => 'required|array',
             ]);
 
-            $photo = $request->file('photo');
-            $this->employee->update($id, $validated, $photo);
+            $photo = $request->file('photo'); // This is from the webcam capture modal so it maps to facePhoto
+            $this->employee->update($id, $validated, null, $photo);
 
             return back()->with('flash', $this->flashMessage('success', 'Employee face recorded successfully.'));
         } catch (Exception $e) {
@@ -204,7 +211,7 @@ class EmployeeController extends Controller
             }
 
             if ($bestMatch && $bestDistance <= $threshold) {
-                $bestMatch->load('department', 'shift');
+                $bestMatch->load('department');
                 return back()->with('flash', $this->flashMessage('success', 'Face Match Found: ' . $bestMatch->name . ' (Distance: ' . round($bestDistance, 4) . ')'))->with('matched_employee', $bestMatch);
             } else {
                 return back()->with('flash', $this->flashMessage('error', 'No matching face found globally.'));

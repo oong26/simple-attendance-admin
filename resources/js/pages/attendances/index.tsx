@@ -1,3 +1,4 @@
+import DeleteDialog from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -25,12 +26,12 @@ import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/utils';
 import attendances from '@/routes/attendances';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Attendance History',
+        title: 'Attendance',
         href: '/attendances',
     },
 ];
@@ -41,6 +42,7 @@ interface Attendance {
     clock_in_time: string;
     clock_out_time: string | null;
     status: string;
+    attendance_type: string;
     late_minutes: number;
     late_deduction: number;
     employee: {
@@ -53,22 +55,29 @@ interface Attendance {
 
 interface PageProps {
     list: any;
-    employees: { id: number; name: string }[];
+    employees: { id: string; name: string }[];
     date: string | null;
     month: string | null;
+    status: string | null;
 }
 
 export default function Index() {
-    const { list, employees, date, month } = usePage<any>().props as PageProps;
+    const { list, employees, date, month, status } = usePage<any>().props as PageProps;
     const [pageLength, setPageLength] = useState(
         new URLSearchParams(window.location.search).get('perPage') ?? '20',
     );
+
+    // Delete
+    const { processing, delete: destroy } = useForm();
 
     // Filters
     const [filterDate, setFilterDate] = useState(date ?? '');
     const [filterMonth, setFilterMonth] = useState(month ?? '');
     const [filterEmployee, setFilterEmployee] = useState(
         new URLSearchParams(window.location.search).get('employee_id') ?? '',
+    );
+    const [filterStatus, setFilterStatus] = useState(
+        new URLSearchParams(window.location.search).get('status') ?? status ?? '',
     );
 
     const applyFilters = () => {
@@ -78,6 +87,7 @@ export default function Index() {
                 date: filterDate,
                 month: filterMonth,
                 employee_id: filterEmployee,
+                status: filterStatus,
                 perPage: pageLength,
                 page: 1,
             },
@@ -100,6 +110,7 @@ export default function Index() {
                 date: filterDate,
                 month: filterMonth,
                 employee_id: filterEmployee,
+                status: filterStatus,
                 perPage: value,
                 page: 1,
             },
@@ -114,18 +125,27 @@ export default function Index() {
         setFilterDate('');
         setFilterMonth('');
         setFilterEmployee('');
+        setFilterStatus('');
         router.get(attendances.index().url);
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Attendance History" />
+            <Head title="Attendance" />
             <div className="m-4 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold tracking-tight">
+                        Attendance
+                    </h2>
+                    <Button onClick={() => router.visit(attendances.create.url())} className="bg-green-600 hover:bg-green-700 text-white">
+                        New Leave
+                    </Button>
+                </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Filters</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 items-end gap-4 md:grid-cols-4">
+                    <CardContent className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         <div className="space-y-2">
                             <Label>Date</Label>
                             <Input
@@ -169,7 +189,20 @@ export default function Index() {
                                 ))}
                             </NativeSelect>
                         </div>
-                        <div className="flex justify-end space-x-2">
+                        <div className="space-y-2">
+                            <Label>Status</Label>
+                            <NativeSelect
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <NativeSelectOption value="">All Statuses</NativeSelectOption>
+                                <NativeSelectOption value="on-time">On-time</NativeSelectOption>
+                                <NativeSelectOption value="late">Late</NativeSelectOption>
+                                <NativeSelectOption value="absent">Absent</NativeSelectOption>
+                                <NativeSelectOption value="leave">Leave</NativeSelectOption>
+                            </NativeSelect>
+                        </div>
+                        <div className="flex justify-end gap-2 sm:col-span-2 lg:col-span-1">
                             <Button onClick={applyFilters}>Filter</Button>
                             <Button variant="outline" onClick={clearFilters}>
                                 Clear
@@ -216,8 +249,10 @@ export default function Index() {
                                     <TableHead>Clock In</TableHead>
                                     <TableHead>Clock Out</TableHead>
                                     <TableHead>Late (min)</TableHead>
-                                    <TableHead>Potongan</TableHead>
+                                    <TableHead>Deduction</TableHead>
                                     <TableHead>Status</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             {list.data.length > 0 && (
@@ -283,6 +318,21 @@ export default function Index() {
                                                 >
                                                     {item.status}
                                                 </span>
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.attendance_type}
+                                            </TableCell>
+                                            <TableCell>
+                                                <DeleteDialog
+                                                    itemName={`${item.employee.name} - ${formatDate(item.date)}`}
+                                                    onConfirm={() =>
+                                                        destroy(
+                                                            attendances.destroy.url(
+                                                                item.id,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     ))}

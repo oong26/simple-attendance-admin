@@ -15,15 +15,16 @@ class Attendance extends Model
         'clock_in_time',
         'clock_out_time',
         'status',
+        'attendance_type',
         'late_minutes',
         'late_deduction',
+        'note',
     ];
 
     protected $casts = [
         'date' => 'date',
         'late_minutes' => 'integer',
         'late_deduction' => 'integer',
-        'employee_id' => 'integer',
     ];
 
     public function employee()

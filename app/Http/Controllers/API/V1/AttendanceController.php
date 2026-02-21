@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\v1;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\LateDeductionRule;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -116,7 +117,7 @@ class AttendanceController extends Controller
                     'present' => 'on-time',
                     'late' => 'late',
                     'absent' => 'absent',
-                    'leave' => 'off-day',
+                    'leave' => 'leave',
                 ];
                 
                 $uiStatus = $statusMap[$att->status] ?? 'on-time';
@@ -272,7 +273,7 @@ class AttendanceController extends Controller
 
                 $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
 
-                if ($now->gt($lateThreshold)) {
+                if ($now->gt($lateThreshold) && $employee->attendance_type === 'onsite') {
                     $status = 'late';
                     $lateMinutes = $shiftStart->diffInMinutes($now);
                 }
@@ -424,9 +425,20 @@ class AttendanceController extends Controller
 
                     $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
 
-                    if ($now->gt($lateThreshold)) {
+                    if ($now->gt($lateThreshold) && $bestMatch->attendance_type === 'onsite') {
                         $status = 'late';
                         $lateMinutes = $shiftStart->diffInMinutes($now);
+                    }
+                }
+
+                // Calculate late deduction
+                $totalDeduction = null;
+                if ($bestMatch->attendance_type == 'onsite') {
+                    if ($status === 'late') {
+                        $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
+                        if ($lateDeductionRule) {
+                            $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                        }
                     }
                 }
 
@@ -435,7 +447,9 @@ class AttendanceController extends Controller
                     'date' => $today,
                     'clock_in_time' => $now->toTimeString(),
                     'status' => $status,
+                    'attendance_type' => 'face',
                     'late_minutes' => $lateMinutes,
+                    'late_deduction' => $totalDeduction,
                 ]);
 
                 return response()->json([
@@ -526,9 +540,20 @@ class AttendanceController extends Controller
 
                     $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
 
-                    if ($now->gt($lateThreshold)) {
+                    if ($now->gt($lateThreshold) && $employee->attendance_type === 'onsite') {
                         $status = 'late';
                         $lateMinutes = $shiftStart->diffInMinutes($now);
+                    }
+                }
+
+                // Calculate late deduction
+                $totalDeduction = null;
+                if ($employee->attendance_type == 'onsite') {
+                    if ($status === 'late') {
+                        $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
+                        if ($lateDeductionRule) {
+                            $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                        }
                     }
                 }
 
@@ -537,7 +562,9 @@ class AttendanceController extends Controller
                     'date' => $today,
                     'clock_in_time' => $now->toTimeString(),
                     'status' => $status,
+                    'attendance_type' => 'qrcode',
                     'late_minutes' => $lateMinutes,
+                    'late_deduction' => $totalDeduction,
                 ]);
 
                 return response()->json([

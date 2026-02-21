@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\HolidayInterface;
+use App\Models\Holiday;
 use Illuminate\Support\Facades\Http;
 
 class HolidayService
@@ -35,11 +36,9 @@ class HolidayService
 
         $count = 0;
         foreach ($result as $dayOff) {
-            $data = [
-                'name' => $dayOff['name'],
-                'date' => $dayOff['date'],
-            ];
-            $this->holidayRepository->store($data);
+            Holiday::updateOrCreate(
+                ['date' => $dayOff['date'], 'name' => $dayOff['name']]
+            );
 
             $count++;
         }

@@ -142,6 +142,9 @@ export default function MonthlyReport() {
                 } else if (record.status === 'absent') {
                     rowData.push('Absent');
                     rowData.push('-');
+                } else if (record.status === 'leave') {
+                    rowData.push('Izin');
+                    rowData.push('Izin');
                 } else {
                     const inStr = record.clock_in
                         ? record.clock_in.substring(11, 16)
@@ -382,7 +385,8 @@ export default function MonthlyReport() {
                                                             <span className="text-xs font-semibold uppercase">
                                                                 Absent
                                                             </span>
-                                                        ) : (
+                                                        ) : record.status ===
+                                                          'leave' ? 'Izin' : (
                                                             <div className="whitespace-nowrap">
                                                                 <span
                                                                     className={
@@ -409,8 +413,11 @@ export default function MonthlyReport() {
                                                     >
                                                         {record.status !==
                                                         'absent'
-                                                            ? OutTimeStr
-                                                            : '-'}
+                                                            ? record.status ==
+                                                                  'leave'
+                                                                ? 'Izin'
+                                                                : OutTimeStr
+                                                            : 'Alpa'}
                                                     </TableCell>
                                                 </Fragment>
                                             );

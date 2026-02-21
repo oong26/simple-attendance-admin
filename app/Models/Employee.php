@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'name',
@@ -15,7 +16,11 @@ class Employee extends Model
         'phone',
         'department_id',
         'face_embedding',
+        'photo',
         'photo_url',
+        'contract_type',
+        'attendance_type',
+        'contract_end_date',
         'is_active',
         'grace_period_minutes',
     ];

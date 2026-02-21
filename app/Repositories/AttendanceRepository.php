@@ -106,7 +106,7 @@ class AttendanceRepository implements AttendanceInterface {
             $globalGrace = \App\Models\Setting::where('key', 'grace_period')->value('value') ?? 15;
             $graceContext = $employee->grace_period_override ?? $globalGrace;
             
-            if ($clockInSeconds > ($shiftStartSeconds + ($graceContext * 60))) {
+            if ($clockInSeconds > ($shiftStartSeconds + ($graceContext * 60)) && $employee->attendance_type === 'onsite') {
                 $status = 'late';
                 $lateMinutes = floor(($clockInSeconds - $shiftStartSeconds) / 60);
                 

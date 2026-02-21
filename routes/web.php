@@ -40,7 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Attendance
     Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('attendances/leave', [AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('attendances/leave', [AttendanceController::class, 'storeLeave'])->name('attendances.store-leave');
     Route::get('attendance/monitor', [AttendanceController::class, 'monitor'])->name('attendance.monitor');
+    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
 
     // Late Deduction
     Route::resource('late-deductions', LateDeductionRuleController::class)->except(['create', 'show', 'edit']);

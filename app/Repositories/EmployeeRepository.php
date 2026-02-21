@@ -22,10 +22,15 @@ class EmployeeRepository implements EmployeeInterface {
         return $data->get();
     }
 
-    public function store($form, $photo = null): Employee|null
+    public function store($form, $photo = null, $facePhoto = null): Employee|null
     {
         if ($photo) {
             $path = $photo->store('photos', 'public');
+            $form['photo'] = '/storage/' . $path;
+        }
+
+        if ($facePhoto) {
+            $path = $facePhoto->store('photos', 'public');
             $form['photo_url'] = '/storage/' . $path;
         }
         return Employee::create($form);
@@ -36,7 +41,7 @@ class EmployeeRepository implements EmployeeInterface {
         return Employee::with(['department'])->find($id);
     }
 
-    public function update($id, $form, $photo = null): Employee|null
+    public function update($id, $form, $photo = null, $facePhoto = null): Employee|null
     {
         $employee = Employee::find($id);
         if (!$employee) {
@@ -44,12 +49,22 @@ class EmployeeRepository implements EmployeeInterface {
         }
 
         if ($photo) {
-            // Delete old photo if exists
+            // Delete old cover photo if exists
+            if ($employee->photo) {
+                $oldPath = str_replace('/storage/', '', $employee->photo);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $path = $photo->store('photos', 'public');
+            $form['photo'] = '/storage/' . $path;
+        }
+
+        if ($facePhoto) {
+            // Delete old face photo if exists
             if ($employee->photo_url) {
                 $oldPath = str_replace('/storage/', '', $employee->photo_url);
                 Storage::disk('public')->delete($oldPath);
             }
-            $path = $photo->store('photos', 'public');
+            $path = $facePhoto->store('photos', 'public');
             $form['photo_url'] = '/storage/' . $path;
         }
 

@@ -1,4 +1,5 @@
 import { FaceCaptureDialog } from '@/components/FaceCaptureDialog';
+import { IdCardModal } from '@/components/IdCardModal';
 import TableControls from '@/components/table-controls';
 import {
     AlertDialog,
@@ -60,10 +61,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface Employee {
-    id: number;
+    id: string;
     name: string;
     email: string;
     phone: string;
+    photo: string | null;
     department: {
         name: string;
         shift_id: number;
@@ -76,6 +78,13 @@ interface Employee {
     } | null;
     photo_url: string | null;
     is_active: boolean;
+    shift?: {
+        name: string;
+        start_time: string;
+        end_time: string;
+    } | null;
+    grace_period_minutes?: number;
+    contract_type?: string;
 }
 
 interface PageProps {
@@ -93,16 +102,17 @@ export default function Index() {
     const { delete: destroy } = useForm();
 
     const [recordingEmployeeId, setRecordingEmployeeId] = useState<
-        number | null
+        string | null
     >(null);
     const [verifyingEmployeeId, setVerifyingEmployeeId] = useState<
-        number | null
+        string | null
     >(null);
     const [isGlobalVerifying, setIsGlobalVerifying] = useState<boolean>(false);
     const [qrEmployee, setQrEmployee] = useState<Employee | null>(null);
+    const [idCardEmployee, setIdCardEmployee] = useState<Employee | null>(null);
 
     // For custom delete trigger
-    const [deleteEmployeeId, setDeleteEmployeeId] = useState<number | null>(
+    const [deleteEmployeeId, setDeleteEmployeeId] = useState<string | null>(
         null,
     );
     const [deleteEmployeeName, setDeleteEmployeeName] = useState<string>('');
@@ -241,7 +251,13 @@ export default function Index() {
                                             {list.from + i}
                                         </TableCell>
                                         <TableCell>
-                                            {item.photo_url ? (
+                                            {item.photo ? (
+                                                <img
+                                                    src={item.photo}
+                                                    alt={item.name}
+                                                    className="h-10 w-10 rounded-full object-cover"
+                                                />
+                                            ) : item.photo_url ? (
                                                 <img
                                                     src={item.photo_url}
                                                     alt={item.name}
@@ -327,6 +343,13 @@ export default function Index() {
                                                         }
                                                     >
                                                         View QR Code
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={() =>
+                                                            setIdCardEmployee(item)
+                                                        }
+                                                    >
+                                                        Download ID Card
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
@@ -437,6 +460,12 @@ export default function Index() {
                 </DialogContent>
             </Dialog>
 
+            <IdCardModal
+                employee={idCardEmployee}
+                open={idCardEmployee !== null}
+                onOpenChange={(v: boolean) => !v && setIdCardEmployee(null)}
+            />
+
             <Dialog
                 open={!!matched_employee}
                 onOpenChange={(v) => {
@@ -453,7 +482,13 @@ export default function Index() {
                     </DialogHeader>
                     {matched_employee && (
                         <div className="flex flex-col items-center space-y-4 py-4">
-                            {matched_employee.photo_url ? (
+                            {matched_employee.photo ? (
+                                                <img
+                                                    src={matched_employee.photo}
+                                                    alt={matched_employee.name}
+                                                    className="h-32 w-32 rounded-full object-cover shadow-md"
+                                                />
+                            ) : matched_employee.photo_url ? (
                                 <img
                                     src={matched_employee.photo_url}
                                     alt={matched_employee.name}

@@ -271,11 +271,11 @@ export default function MonthlyReport() {
                         </Button>
                     </CardHeader>
                     <CardContent className="max-w-full overflow-x-auto">
-                        <Table className="min-w-max border">
+                        <Table className="min-w-max border dark:border-slate-800">
                             <TableHeader>
-                                <TableRow className="bg-slate-50">
+                                <TableRow className="bg-slate-50 dark:bg-slate-900 border-b dark:border-slate-800">
                                     <TableHead
-                                        className="border px-4 py-2 text-center align-middle"
+                                        className="border dark:border-slate-800 px-4 py-2 text-center align-middle"
                                         rowSpan={2}
                                     >
                                         Tanggal
@@ -283,25 +283,25 @@ export default function MonthlyReport() {
                                     {employees.map((emp) => (
                                         <TableHead
                                             key={emp.id}
-                                            className="border px-4 py-2 text-center"
+                                            className="border dark:border-slate-800 px-4 py-2 text-center"
                                             colSpan={2}
                                         >
-                                            <div className="font-bold text-slate-800">
+                                            <div className="font-bold text-slate-800 dark:text-slate-200">
                                                 {emp.name}
                                             </div>
-                                            <div className="text-xs font-normal text-slate-500">
+                                            <div className="text-xs font-normal text-slate-500 dark:text-slate-400">
                                                 {emp.department?.name || '-'}
                                             </div>
                                         </TableHead>
                                     ))}
                                 </TableRow>
-                                <TableRow className="bg-slate-50">
+                                <TableRow className="bg-slate-50 dark:bg-slate-900">
                                     {employees.map((emp) => (
                                         <Fragment key={`sub-${emp.id}`}>
-                                            <TableHead className="w-24 border px-4 py-2 text-center text-xs">
+                                            <TableHead className="w-24 border dark:border-slate-800 px-4 py-2 text-center text-xs">
                                                 Jam Masuk
                                             </TableHead>
-                                            <TableHead className="w-24 border px-4 py-2 text-center text-xs">
+                                            <TableHead className="w-24 border dark:border-slate-800 px-4 py-2 text-center text-xs">
                                                 Jam Keluar
                                             </TableHead>
                                         </Fragment>
@@ -314,15 +314,15 @@ export default function MonthlyReport() {
                                         key={cDay.day}
                                         className={
                                             cDay.is_weekend
-                                                ? 'bg-slate-100/50'
+                                                ? 'bg-slate-100/50 dark:bg-slate-800/50'
                                                 : ''
                                         }
                                     >
-                                        <TableCell className="min-w-[150px] border px-4 py-2 align-top whitespace-nowrap">
-                                            <div className="font-medium text-slate-700">
+                                        <TableCell className="min-w-[150px] border dark:border-slate-800 px-4 py-2 align-top whitespace-nowrap">
+                                            <div className="font-medium text-slate-700 dark:text-slate-300">
                                                 {cDay.day_name}
                                             </div>
-                                            <div className="text-xs text-slate-500">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
                                                 {cDay.date_string}
                                             </div>
                                         </TableCell>
@@ -339,10 +339,10 @@ export default function MonthlyReport() {
                                                     <Fragment
                                                         key={`td-${cDay.day}-${emp.id}`}
                                                     >
-                                                        <TableCell className="border px-4 py-3 text-center text-slate-300">
+                                                        <TableCell className="border dark:border-slate-800 px-4 py-3 text-center text-slate-300 dark:text-slate-600">
                                                             -
                                                         </TableCell>
-                                                        <TableCell className="border px-4 py-3 text-center text-slate-300">
+                                                        <TableCell className="border dark:border-slate-800 px-4 py-3 text-center text-slate-300 dark:text-slate-600">
                                                             -
                                                         </TableCell>
                                                     </Fragment>
@@ -367,10 +367,10 @@ export default function MonthlyReport() {
                                             const InClass =
                                                 record.late_minutes > 0
                                                     ? 'text-red-500 font-bold'
-                                                    : 'text-slate-700 font-medium';
+                                                    : 'text-slate-700 dark:text-slate-300 font-medium';
                                             const StatusClass =
                                                 record.status === 'absent'
-                                                    ? 'bg-red-50 text-red-500'
+                                                    ? 'bg-red-50 dark:bg-red-950/30 text-red-500'
                                                     : '';
 
                                             return (
@@ -378,7 +378,7 @@ export default function MonthlyReport() {
                                                     key={`td-${cDay.day}-${emp.id}`}
                                                 >
                                                     <TableCell
-                                                        className={`border px-4 py-3 text-center ${StatusClass}`}
+                                                        className={`border dark:border-slate-800 px-4 py-3 text-center ${StatusClass}`}
                                                     >
                                                         {record.status ===
                                                         'absent' ? (
@@ -409,15 +409,9 @@ export default function MonthlyReport() {
                                                         )}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`border px-4 py-3 text-center font-medium text-slate-700 ${StatusClass}`}
+                                                        className={`border dark:border-slate-800 px-4 py-3 text-center font-medium text-slate-700 dark:text-slate-300 ${StatusClass}`}
                                                     >
-                                                        {record.status !==
-                                                        'absent'
-                                                            ? record.status ==
-                                                                  'leave'
-                                                                ? 'Izin'
-                                                                : OutTimeStr
-                                                            : 'Alpa'}
+                                                        {record.status === 'absent' ? 'Alpa' : record.status === 'leave' ? 'Izin' : OutTimeStr}
                                                     </TableCell>
                                                 </Fragment>
                                             );
@@ -435,8 +429,8 @@ export default function MonthlyReport() {
                                     </TableRow>
                                 )}
                                 {calendar.length > 0 && (
-                                    <TableRow className="bg-red-50 font-bold text-red-700">
-                                        <TableCell className="border px-4 py-3 text-right">
+                                    <TableRow className="bg-red-50 dark:bg-red-950/30 font-bold text-red-700 dark:text-red-400">
+                                        <TableCell className="border dark:border-slate-800 px-4 py-3 text-right">
                                             Total Potongan Telat
                                         </TableCell>
                                         {employees.map((emp) => {
@@ -459,7 +453,7 @@ export default function MonthlyReport() {
                                                 <TableCell
                                                     key={`total-${emp.id}`}
                                                     colSpan={2}
-                                                    className="border px-4 py-3 text-center"
+                                                    className="border dark:border-slate-800 px-4 py-3 text-center"
                                                 >
                                                     {total > 0
                                                         ? new Intl.NumberFormat(

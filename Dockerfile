@@ -1,65 +1,90 @@
 # ==========================================
-# Stage 1: Build Frontend Assets (Node.js)
+# Stage 1: Install Dependencies & Build
 # ==========================================
-FROM node:20 AS vite
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+FROM php:8.2-fpm AS build
 
-# ==========================================
-# Stage 2: Install PHP Dependencies (Composer)
-# ==========================================
-FROM composer:2.7 AS composer
-WORKDIR /app
-COPY composer.json composer.lock ./
-# Install no-dev dependencies efficiently
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
-COPY . .
-RUN composer dump-autoload --optimize --no-dev
-
-# ==========================================
-# Stage 3: Final Production Image (PHP Apache)
-# ==========================================
-FROM php:8.2-apache
-
-# Install required system packages and PHP extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     unzip \
+    curl \
     && rm -rf /var/lib/apt/lists/* \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo_mysql zip pcntl
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Change Apache document root to Laravel's public directory
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+WORKDIR /app
+
+# Composer dependencies
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Copy all files
+COPY . .
+
+RUN composer dump-autoload --optimize --no-dev
+
+# Create a temporary environment file so Laravel can boot during the build process
+RUN cp .env.example .env \
+    && sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/g' .env \
+    && touch database/database.sqlite \
+    && php artisan key:generate
+
+# NPM dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Build
+RUN npm run build
+
+
+# ==========================================
+# Stage 2: PHP-FPM Backend (php target)
+# ==========================================
+FROM php:8.2-fpm AS php
+
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    netcat-traditional \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip pcntl
 
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy project files from context
 COPY . .
+# Copy built artifacts from build stage
+COPY --from=build /app/vendor ./vendor
+COPY --from=build /app/public/build ./public/build
 
-# Copy built frontend assets from Vite stage
-COPY --from=vite /app/public/build ./public/build
-
-# Copy vendor directory from Composer stage
-COPY --from=composer /app/vendor ./vendor
-
-# Set permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Expose standard port 8181 (will be mapped in docker-compose)
-EXPOSE 8181
+COPY docker/docker-entrypoint-php.sh /usr/local/bin/docker-entrypoint-php.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-php.sh
 
-# Run Apache in the foreground
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-php.sh"]
+
+# ==========================================
+# Stage 3: Web Server (nginx target)
+# ==========================================
+FROM nginx:alpine AS nginx
+
+WORKDIR /var/www/html
+
+COPY . .
+COPY --from=build /app/public/build ./public/build
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 8181

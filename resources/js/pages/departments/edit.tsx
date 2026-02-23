@@ -120,11 +120,11 @@ export default function Edit() {
                         </div>
                         <div className="space-y-3">
                             <Label>Workdays Schedule</Label>
-                            <div className="mt-2 flex flex-col gap-3 rounded-md border bg-slate-50/50 p-4">
+                            <div className="mt-2 flex flex-col gap-3 rounded-md border bg-slate-50/50 dark:bg-slate-900/50 p-4">
                                 {data.workdays.map((workday) => (
                                     <div
                                         key={workday.day}
-                                        className="flex flex-col gap-2 rounded border bg-white p-2 sm:flex-row sm:items-center sm:gap-4"
+                                        className="flex flex-col gap-2 rounded border bg-white dark:bg-slate-950 p-2 sm:flex-row sm:items-center sm:gap-4"
                                     >
                                         <div className="flex w-32 items-center space-x-2">
                                             <Checkbox

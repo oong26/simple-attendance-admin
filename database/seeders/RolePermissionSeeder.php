@@ -21,16 +21,11 @@ class RolePermissionSeeder extends Seeder
 
         /**
          * ADMIN PERMISSIONS 
-         * Can view + manage products, users, roles, API keys, sessions, settings
+         * Can view + manage users, roles, API keys, sessions, settings
          * But cannot edit permissions themselves (security practice)
          */
         $adminPermissions = [
             'dashboard.view',
-
-            'products.view',
-            'products.create',
-            'products.edit',
-            'products.delete',
 
             'users.view',
             'users.create',
@@ -64,8 +59,6 @@ class RolePermissionSeeder extends Seeder
          */
         $staffPermissions = [
             'dashboard.view',
-
-            'products.view',
 
             'settings.profile.view',
             'settings.profile.update',

@@ -1,26 +1,33 @@
-version: '3.8'
-
 services:
-  app:
+  php:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: simple-attendance-admin
-    container_name: simple-attendance-app
-    restart: unless-stopped
-    ports:
-      - "8181:8181"
-    environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - APP_URL=http://localhost:8181
+      target: php
+    container_name: simple-attendance-admin-php
     env_file:
       - .env
-    depends_on:
-      db:
-        condition: service_healthy
+    environment:
+      - DB_HOST=db
+    volumes:
+      - storage:/var/www/html/storage
     networks:
       - attendance-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: nginx
+    container_name: simple-attendance-admin-nginx
+    depends_on:
+      - php
+    volumes:
+      - storage:/var/www/html/storage
+    ports:
+      - "8181:8181"
+    networks:
+      - attendance-network
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
@@ -50,3 +57,4 @@ networks:
 
 volumes:
   db-data:
+  storage:

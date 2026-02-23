@@ -45,6 +45,9 @@ class DepartmentController extends Controller
                 'workdays.*.is_working' => 'required|boolean',
                 'workdays.*.start_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
                 'workdays.*.end_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
+                'lat' => 'nullable|numeric',
+                'long' => 'nullable|numeric',
+                'attendance_radius' => 'nullable|integer|min:1',
             ]);
 
             $this->department->store($validated);
@@ -79,6 +82,9 @@ class DepartmentController extends Controller
                 'workdays.*.is_working' => 'required|boolean',
                 'workdays.*.start_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
                 'workdays.*.end_time' => 'nullable|required_if:workdays.*.is_working,true|date_format:H:i',
+                'lat' => 'nullable|numeric',
+                'long' => 'nullable|numeric',
+                'attendance_radius' => 'nullable|integer|min:1',
             ]);
 
             $this->department->update($id, $validated);

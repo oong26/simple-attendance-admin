@@ -140,4 +140,32 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    /* Leaflet GeoSearch Dark Mode Fix */
+    .dark .leaflet-control-geosearch form {
+        @apply bg-background border-border;
+        background-color: #000000 !important;
+    }
+
+    .dark .leaflet-control-geosearch input {
+        @apply bg-background text-foreground;
+    }
+
+    .dark .leaflet-control-geosearch .results > * {
+        @apply bg-background text-foreground border-border;
+    }
+
+    .dark .leaflet-control-geosearch .results > *.active,
+    .dark .leaflet-control-geosearch .results > *:hover {
+        @apply bg-accent text-accent-foreground;
+    }
+
+    .dark .leaflet-control-geosearch .results {
+        @apply border-border;
+    }
+
+    .dark .leaflet-control-geosearch .reset {
+        background-color: #000000 !important;
+        color: white !important;
+    }
 }

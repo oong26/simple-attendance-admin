@@ -9,7 +9,7 @@ class Department extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'workdays'];
+    protected $fillable = ['name', 'workdays', 'lat', 'long', 'attendance_radius'];
 
     protected $casts = [
         'workdays' => 'array',

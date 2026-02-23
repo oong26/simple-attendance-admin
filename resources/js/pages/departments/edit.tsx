@@ -1,3 +1,4 @@
+import LocationPicker from '@/components/map/location-picker';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -26,6 +27,9 @@ interface Department {
     id: number;
     name: string;
     workdays?: Workday[];
+    lat?: string;
+    long?: string;
+    attendance_radius: number;
 }
 
 interface Props {
@@ -60,9 +64,15 @@ export default function Edit() {
     const { data, setData, put, processing, errors } = useForm<{
         name: string;
         workdays: Workday[];
+        lat: string;
+        long: string;
+        attendance_radius: number;
     }>({
         name: department.name,
         workdays: initialWorkdays,
+        lat: department.lat || '',
+        long: department.long || '',
+        attendance_radius: department.attendance_radius || 5,
     });
 
     const handleWorkdayChange = (day: string, updates: Partial<Workday>) => {
@@ -190,6 +200,74 @@ export default function Edit() {
                             {errors.workdays && (
                                 <p className="text-sm text-red-500">
                                     {errors.workdays}
+                                </p>
+                            )}
+                        </div>
+                        <div className='space-y-3'>
+                            <Label>Lokasi Cabang (Pilih di peta)</Label>
+
+                            <LocationPicker
+                                lat={data.lat ? parseFloat(data.lat) : null}
+                                long={data.long ? parseFloat(data.long) : null}
+                                radius={data.attendance_radius}
+                                onChange={(pos) => {
+                                    setData((prev) => ({
+                                        ...prev,
+                                        lat: pos.lat.toString(),
+                                        long: pos.long.toString(),
+                                    }));
+                                }}
+                            />
+
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <Label>Latitude</Label>
+                                    <Input
+                                        value={data.lat}
+                                        readOnly
+                                        className={errors.lat ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Longitude</Label>
+                                    <Input
+                                        value={data.long}
+                                        readOnly
+                                        className={errors.long ? "border-red-500 focus-visible:ring-red-500" : ""}
+                                    />
+                                </div>
+                            </div>
+
+                            {(errors.lat || errors.long) && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.lat || errors.long}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="attendance_radius">
+                                Attendance Radius (meters)
+                            </Label>
+                            <Input
+                                id="attendance_radius"
+                                type="number"
+                                min="1"
+                                value={data.attendance_radius}
+                                onChange={(e) =>
+                                    setData(
+                                        'attendance_radius',
+                                        parseInt(e.target.value) || 0,
+                                    )
+                                }
+                                required
+                            />
+                            <p className="text-xs text-slate-500">
+                                Distance in meters from the department location where attendance is allowed.
+                            </p>
+                            {errors.attendance_radius && (
+                                <p className="text-sm text-red-500">
+                                    {errors.attendance_radius}
                                 </p>
                             )}
                         </div>

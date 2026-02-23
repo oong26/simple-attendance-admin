@@ -17,44 +17,31 @@ class AttendanceController extends Controller
     public function today(Request $request)
     {
         try {
-            $customer = $request->user();
-            
-            // The customer is essentially the user. Match by phone or phone_number.
-            $employee = Employee::where('phone', $customer->phone)
-                ->orWhere('phone', $customer->phone_number)
-                ->first();
-
-            if (!$employee) {
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Employee profile not linked to this account.'
-                ], 404);
-            }
-
             $today = Carbon::today()->toDateString();
-            $attendance = Attendance::where('employee_id', $employee->id)
-                ->where('date', $today)
-                ->first();
+            $now = Carbon::now();
+            
+            // 1. Holiday Check
+            $holiday = \App\Models\Holiday::where('date', $today)
+                ->orWhere(function($q) {
+                    $q->where('is_recurring', true)
+                      ->whereMonth('date', Carbon::today()->month)
+                      ->whereDay('date', Carbon::today()->day);
+                })->first();
 
-            $totalHours = '0h 0m';
-            if ($attendance && $attendance->clock_in_time && $attendance->clock_out_time) {
-                $in = Carbon::parse($attendance->clock_in_time);
-                $out = Carbon::parse($attendance->clock_out_time);
-                $diffMin = $in->diffInMinutes($out);
-                $hours = floor($diffMin / 60);
-                $mins = $diffMin % 60;
-                $totalHours = "{$hours}h {$mins}m";
-            }
+            // 2. Schedule Check (Default to first department for global kiosk context)
+            $department = \App\Models\Department::first();
+            $todayDayName = $now->format('l');
+            $workdays = $department?->workdays ?? [];
+            $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
+            $isDayOff = !$todaySchedule || !isset($todaySchedule['is_working']) || !$todaySchedule['is_working'];
 
             return response()->json([
                 'success' => true,
-                'employee' => [
-                    'id' => $employee->id,
-                    'name' => $employee->name,
-                    'is_active' => $employee->is_active,
-                ],
-                'attendance' => $attendance,
-                'total_hours' => $totalHours,
+                'is_holiday' => !!$holiday,
+                'holiday_name' => $holiday ? $holiday->name : null,
+                'is_day_off' => $isDayOff,
+                'schedule' => $todaySchedule,
+                'server_time' => $now->toDateTimeString(),
             ]);
         } catch (Exception $e) {
             Log::error('API Today Attendance Error: ' . $e->getMessage());
@@ -370,7 +357,10 @@ class AttendanceController extends Controller
             ]);
 
             $inputEmbedding = $request->face_embedding;
-            $employees = Employee::with('department')->where('is_active', true)->whereNotNull('face_embedding')->get();
+            $employees = Employee::with('department')
+                ->where('is_active', true)
+                ->whereNotNull('face_embedding')
+                ->get();
             
             $bestMatch = null;
             $bestDistance = 1.0;
@@ -397,8 +387,32 @@ class AttendanceController extends Controller
                 return response()->json(['message' => 'Face not recognized'], 401);
             }
 
+            // Contract Expiry Check
+            if ($bestMatch->contract_type !== 'full_time' && !is_null($bestMatch->contract_end_date)) {
+                $contractEnd = Carbon::parse($bestMatch->contract_end_date)->startOfDay();
+                if ($contractEnd->lt(Carbon::today())) {
+                    return response()->json([
+                        'message' => 'Your contract expired on ' . $contractEnd->format('d M Y') . '. Please contact HR.'
+                    ], 403);
+                }
+            }
+
             $today = Carbon::today()->toDateString();
             $now = Carbon::now();
+
+            // Holiday Check
+            $holiday = \App\Models\Holiday::where('date', $today)
+                ->orWhere(function($q) {
+                    $q->where('is_recurring', true)
+                      ->whereMonth('date', Carbon::today()->month)
+                      ->whereDay('date', Carbon::today()->day);
+                })->first();
+
+            if ($holiday) {
+                return response()->json([
+                    'message' => 'Today is a holiday (' . $holiday->name . '). Attendance is disabled.'
+                ], 403);
+            }
 
             // Check existing attendance for today
             $attendance = Attendance::where('employee_id', $bestMatch->id)
@@ -529,8 +543,32 @@ class AttendanceController extends Controller
                 return response()->json(['message' => 'Employee is inactive'], 403);
             }
 
+            // Contract Expiry Check
+            if ($employee->contract_type !== 'full_time' && !is_null($employee->contract_end_date)) {
+                $contractEnd = Carbon::parse($employee->contract_end_date)->startOfDay();
+                if ($contractEnd->lt(Carbon::today())) {
+                    return response()->json([
+                        'message' => 'Your contract expired on ' . $contractEnd->format('d M Y') . '. Please contact HR.'
+                    ], 403);
+                }
+            }
+
             $today = Carbon::today()->toDateString();
             $now = Carbon::now();
+
+            // Holiday Check
+            $holiday = \App\Models\Holiday::where('date', $today)
+                ->orWhere(function($q) {
+                    $q->where('is_recurring', true)
+                      ->whereMonth('date', Carbon::today()->month)
+                      ->whereDay('date', Carbon::today()->day);
+                })->first();
+
+            if ($holiday) {
+                return response()->json([
+                    'message' => 'Today is a holiday (' . $holiday->name . '). Attendance is disabled.'
+                ], 403);
+            }
 
             // Check existing attendance for today
             $attendance = Attendance::where('employee_id', $employee->id)

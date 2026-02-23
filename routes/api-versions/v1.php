@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\v1\AttendanceController;
-use App\Http\Controllers\API\v1\AuthController;
+use App\Http\Controllers\API\V1\AttendanceController;
+use App\Http\Controllers\API\V1\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['api-key'])

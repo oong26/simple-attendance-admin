@@ -39,8 +39,8 @@ services:
       MYSQL_USER: ${DB_USERNAME:-attendance_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
     ports:
-      # Mapping to host port 33060 to avoid conflicting with host's 3306
-      - "33060:3306"
+      # Mapping to host port 33061 to avoid conflicting with host's 3306
+      - "33061:3306"
     volumes:
       - db-data:/var/lib/mysql
     networks:

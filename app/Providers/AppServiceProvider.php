@@ -13,6 +13,7 @@ use App\Repositories\RolePermissionRepository;
 use App\Repositories\SessionRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force HTTPS if the environment is production
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
     }
 }

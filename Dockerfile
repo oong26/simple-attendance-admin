@@ -58,8 +58,8 @@ COPY --from=composer /app/vendor ./vendor
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Expose standard port 80 (will be mapped in docker-compose)
-EXPOSE 80
+# Expose standard port 8181 (will be mapped in docker-compose)
+EXPOSE 8181
 
 # Run Apache in the foreground
 CMD ["apache2-foreground"]

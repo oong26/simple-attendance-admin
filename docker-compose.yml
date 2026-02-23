@@ -9,7 +9,7 @@ services:
     container_name: simple-attendance-app
     restart: unless-stopped
     ports:
-      - "8181:80"
+      - "8181:8181"
     environment:
       - APP_ENV=production
       - APP_DEBUG=false

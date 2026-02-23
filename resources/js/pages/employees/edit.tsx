@@ -241,10 +241,10 @@ export default function Edit() {
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="photo">Employee Photo</Label>
-                                {employee.photo_url && !data.photo && (
+                                {(employee.photo) && !data.photo && (
                                     <div className="mb-2">
                                         <img
-                                            src={employee.photo_url}
+                                            src={employee.photo}
                                             alt="Current"
                                             className="h-20 w-20 rounded object-cover"
                                         />
@@ -278,14 +278,14 @@ export default function Edit() {
                             <div className="space-y-2">
                                 <Label>Face Recognition</Label>
                                 <div className="mb-2">
-                                    {employee.face_embedding ? (
-                                        <span className="text-sm text-green-600">
-                                            ✓ Face template is registered.
-                                        </span>
-                                    ) : (
-                                        <span className="text-sm text-yellow-600">
-                                            ⚠ No face template registered.
-                                        </span>
+                                    {employee.photo_url && !data.photo && (
+                                        <div className="mb-2">
+                                            <img
+                                                src={employee.photo_url}
+                                                alt="Current"
+                                                className="h-20 w-20 rounded object-cover"
+                                            />
+                                        </div>
                                     )}
                                 </div>
                                 <div className="flex items-center space-x-4">

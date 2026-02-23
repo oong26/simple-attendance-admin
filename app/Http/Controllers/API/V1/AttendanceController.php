@@ -432,7 +432,7 @@ class AttendanceController extends Controller
                 }
 
                 // Calculate late deduction
-                $totalDeduction = null;
+                $totalDeduction = 0;
                 $isArriveLatePermission = $attendance && $attendance->status === 'arrive_late';
 
                 if ($bestMatch->attendance_type == 'onsite') {
@@ -564,7 +564,7 @@ class AttendanceController extends Controller
                 }
 
                 // Calculate late deduction
-                $totalDeduction = null;
+                $totalDeduction = 0;
                 $isArriveLatePermission = $attendance && $attendance->status === 'arrive_late';
 
                 if ($employee->attendance_type == 'onsite') {

@@ -68,7 +68,13 @@ class EmployeeRepository implements EmployeeInterface {
             $form['photo_url'] = '/storage/' . $path;
         }
 
-        $employee->update($form);
+        // Filter out null values for specific fields to prevent overwriting existing data
+        // if they were not provided in the form but sent as null from the frontend
+        $updateData = array_filter($form, function ($value, $key) {
+            return !in_array($key, ['face_embedding', 'photo', 'photo_url']) || !is_null($value);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $employee->update($updateData);
 
         return $employee;
     }
@@ -76,6 +82,10 @@ class EmployeeRepository implements EmployeeInterface {
     public function delete($id): int
     {
         $employee = Employee::findOrFail($id);
+        if ($employee->photo) {
+            $oldPath = str_replace('/storage/', '', $employee->photo);
+            Storage::disk('public')->delete($oldPath);
+        }
         if ($employee->photo_url) {
             $oldPath = str_replace('/storage/', '', $employee->photo_url);
             Storage::disk('public')->delete($oldPath);

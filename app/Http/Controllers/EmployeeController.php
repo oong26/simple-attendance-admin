@@ -7,7 +7,6 @@ use App\Interfaces\EmployeeInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Exception;
 
 class EmployeeController extends Controller

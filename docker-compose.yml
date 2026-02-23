@@ -9,6 +9,9 @@ services:
     environment:
       - DB_HOST=db
     volumes:
+      # 1. Mount the app code so public/storage (the link) exists
+      - ./:/var/www/html
+      # 2. Mount the named volume for persistent storage
       - storage:/var/www/html/storage
     networks:
       - attendance-network
@@ -22,6 +25,9 @@ services:
     depends_on:
       - php
     volumes:
+      # 1. Nginx MUST see the public/ directory and the symlink
+      - ./:/var/www/html
+      # 2. Nginx MUST see the actual storage folder to follow the link
       - storage:/var/www/html/storage
     ports:
       - "8181:8181"
@@ -39,7 +45,6 @@ services:
       MYSQL_USER: ${DB_USERNAME:-attendance_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
     ports:
-      # Mapping to host port 33061 to avoid conflicting with host's 3306
       - "33061:3306"
     volumes:
       - db-data:/var/lib/mysql

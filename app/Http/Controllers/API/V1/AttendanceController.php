@@ -406,7 +406,7 @@ class AttendanceController extends Controller
                 ->first();
 
             // CLOCK IN LOGIC
-            if (!$attendance) {
+            if (!$attendance || ($attendance && $attendance->status === 'arrive_late' && !$attendance->clock_in_time)) {
                 $status = 'present';
                 $lateMinutes = 0;
                 
@@ -433,24 +433,41 @@ class AttendanceController extends Controller
 
                 // Calculate late deduction
                 $totalDeduction = null;
+                $isArriveLatePermission = $attendance && $attendance->status === 'arrive_late';
+
                 if ($bestMatch->attendance_type == 'onsite') {
                     if ($status === 'late') {
-                        $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
-                        if ($lateDeductionRule) {
-                            $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                        if ($isArriveLatePermission) {
+                            $totalDeduction = 0;
+                        } else {
+                            $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
+                            if ($lateDeductionRule) {
+                                $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                            }
                         }
                     }
                 }
 
-                $newAttendance = Attendance::create([
-                    'employee_id' => $bestMatch->id,
-                    'date' => $today,
-                    'clock_in_time' => $now->toTimeString(),
-                    'status' => $status,
-                    'attendance_type' => 'face',
-                    'late_minutes' => $lateMinutes,
-                    'late_deduction' => $totalDeduction,
-                ]);
+                if ($isArriveLatePermission) {
+                    $attendance->update([
+                        'clock_in_time' => $now->toTimeString(),
+                        'status' => $status,
+                        'attendance_type' => 'face',
+                        'late_minutes' => $lateMinutes,
+                        'late_deduction' => $totalDeduction,
+                    ]);
+                    $newAttendance = $attendance->fresh();
+                } else {
+                    $newAttendance = Attendance::create([
+                        'employee_id' => $bestMatch->id,
+                        'date' => $today,
+                        'clock_in_time' => $now->toTimeString(),
+                        'status' => $status,
+                        'attendance_type' => 'face',
+                        'late_minutes' => $lateMinutes,
+                        'late_deduction' => $totalDeduction,
+                    ]);
+                }
 
                 return response()->json([
                     'message' => 'Clock in successful',
@@ -521,7 +538,7 @@ class AttendanceController extends Controller
                 ->first();
 
             // CLOCK IN LOGIC
-            if (!$attendance) {
+            if (!$attendance || ($attendance && $attendance->status === 'arrive_late' && !$attendance->clock_in_time)) {
                 $status = 'present';
                 $lateMinutes = 0;
                 
@@ -548,24 +565,41 @@ class AttendanceController extends Controller
 
                 // Calculate late deduction
                 $totalDeduction = null;
+                $isArriveLatePermission = $attendance && $attendance->status === 'arrive_late';
+
                 if ($employee->attendance_type == 'onsite') {
                     if ($status === 'late') {
-                        $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
-                        if ($lateDeductionRule) {
-                            $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                        if ($isArriveLatePermission) {
+                            $totalDeduction = 0;
+                        } else {
+                            $lateDeductionRule = LateDeductionRule::where('is_active', true)->first();
+                            if ($lateDeductionRule) {
+                                $totalDeduction = $lateDeductionRule->amount_per_minute * (int) $lateMinutes;
+                            }
                         }
                     }
                 }
 
-                $newAttendance = Attendance::create([
-                    'employee_id' => $employee->id,
-                    'date' => $today,
-                    'clock_in_time' => $now->toTimeString(),
-                    'status' => $status,
-                    'attendance_type' => 'qrcode',
-                    'late_minutes' => $lateMinutes,
-                    'late_deduction' => $totalDeduction,
-                ]);
+                if ($isArriveLatePermission) {
+                    $attendance->update([
+                        'clock_in_time' => $now->toTimeString(),
+                        'status' => $status,
+                        'attendance_type' => 'qrcode',
+                        'late_minutes' => $lateMinutes,
+                        'late_deduction' => $totalDeduction,
+                    ]);
+                    $newAttendance = $attendance->fresh();
+                } else {
+                    $newAttendance = Attendance::create([
+                        'employee_id' => $employee->id,
+                        'date' => $today,
+                        'clock_in_time' => $now->toTimeString(),
+                        'status' => $status,
+                        'attendance_type' => 'qrcode',
+                        'late_minutes' => $lateMinutes,
+                        'late_deduction' => $totalDeduction,
+                    ]);
+                }
 
                 return response()->json([
                     'message' => 'Clock in successful',

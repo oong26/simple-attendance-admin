@@ -138,6 +138,7 @@ class AttendanceController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
             'note' => 'nullable|string',
+            'is_arrive_late' => 'nullable|boolean',
         ]);
 
         $isHoliday = \App\Models\Holiday::whereDate('date', $validated['date'])->first();
@@ -146,10 +147,12 @@ class AttendanceController extends Controller
         }
 
         try {
+            $status = !empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
+
             $this->attendance->store([
                 'employee_id' => $validated['employee_id'],
                 'date' => $validated['date'],
-                'status' => 'leave',
+                'status' => $status,
                 'note' => $validated['note'] ?? null,
                 'clock_in_time' => null,
                 'clock_out_time' => null,

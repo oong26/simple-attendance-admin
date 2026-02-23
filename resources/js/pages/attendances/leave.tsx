@@ -3,6 +3,7 @@ import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import attendances from '@/routes/attendances';
 import { type BreadcrumbItem } from '@/types';
@@ -41,6 +42,7 @@ export default function Leave() {
         employee_id: '',
         date: '',
         note: '',
+        is_arrive_late: false,
     });
 
     const employeeOptions = employees.map((employee) => ({
@@ -130,6 +132,20 @@ export default function Leave() {
                                 {errors.note}
                             </p>
                         )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 pt-2 pb-2">
+                        <Checkbox 
+                            id="is_arrive_late" 
+                            checked={data.is_arrive_late}
+                            onCheckedChange={(checked) => setData('is_arrive_late', checked as boolean)}
+                        />
+                        <Label
+                            htmlFor="is_arrive_late"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Arrive Late
+                        </Label>
                     </div>
 
                     <div className="space-x-2 pt-2">

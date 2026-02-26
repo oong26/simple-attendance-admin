@@ -18,18 +18,21 @@ class ReportController extends Controller
 
     public function monthlyAttendance(Request $request)
     {
-        $month = $request->get('month', Carbon::today()->locale('id_ID')->format('Y-m'));
+        $startDate = $request->get('start_date', Carbon::today()->locale('id_ID')->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::today()->locale('id_ID')->endOfMonth()->format('Y-m-d'));
         $departmentId = $request->get('department_id') ? (int) $request->get('department_id') : null;
         
-        $data = $this->reportRepository->monthlyAttendance($month, $departmentId);
+        $data = $this->reportRepository->monthlyAttendance($startDate, $endDate, $departmentId);
 
         return Inertia::render('reports/monthly', [
-            'monthYear' => $data['monthYear'],
+            'startDate' => $data['startDate'],
+            'endDate' => $data['endDate'],
             'monthName' => $data['monthName'],
             'departments' => $data['departments'],
             'employees' => $data['employees'],
             'attendanceMap' => $data['attendanceMap'],
             'calendar' => $data['calendar'],
+            'holidaysSummary' => $data['holidaysSummary'],
             'selectedDepartment' => $departmentId,
         ]);
     }

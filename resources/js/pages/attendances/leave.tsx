@@ -9,6 +9,7 @@ import attendances from '@/routes/attendances';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import React from 'react';
+import { RequiredLabel } from '@/components/ui/required-label';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,6 +42,7 @@ export default function Leave() {
     const { data, setData, post, processing, errors, setError, clearErrors } = useForm({
         employee_id: '',
         date: '',
+        leave_type: '',
         note: '',
         is_arrive_late: false,
     });
@@ -49,6 +51,11 @@ export default function Leave() {
         value: employee.id.toString(),
         label: employee.name,
     }));
+
+    const leaveTypeOptions = [
+        { value: 'cuti', label: 'Cuti' },
+        { value: 'izin', label: 'Izin' },
+    ];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,12 +72,12 @@ export default function Leave() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Leave Request" />
-            <div className="w-full md:w-8/12 p-4">
+            <div className="w-full md:w-6/12 p-4">
                 <form className="space-y-4 rounded bg-white p-6 shadow dark:bg-zinc-900" onSubmit={handleSubmit}>
                     <h2 className="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Leave Request Form</h2>
                     
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="employee_id">Employee</Label>
+                        <RequiredLabel htmlFor="employee_id">Employee</RequiredLabel>
                         <Combobox
                             options={employeeOptions}
                             value={data.employee_id}
@@ -85,7 +92,22 @@ export default function Leave() {
                     </div>
                     
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="date">Date</Label>
+                        <RequiredLabel htmlFor="leave_type">Leave Type</RequiredLabel>
+                        <Combobox
+                            options={leaveTypeOptions}
+                            value={data.leave_type}
+                            onChange={(val) => setData('leave_type', val)}
+                            placeholder="Select leave type..."
+                        />
+                        {errors.leave_type && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.leave_type}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                        <RequiredLabel htmlFor="date">Date</RequiredLabel>
                         <Input
                             id="date"
                             type="date"

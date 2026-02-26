@@ -43,6 +43,7 @@ interface Attendance {
     clock_out_time: string | null;
     status: string;
     attendance_type: string;
+    leave_type: string | null;
     late_minutes: number;
     late_deduction: number;
     employee: {
@@ -320,7 +321,13 @@ export default function Index() {
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                {item.attendance_type}
+                                                {item.leave_type == null
+                                                    ? item.attendance_type
+                                                    : (
+                                                        <span className="rounded px-2 py-1 text-xs capitalize bg-yellow-100 text-yellow-800">
+                                                            {item.leave_type}
+                                                        </span>
+                                                    )}
                                             </TableCell>
                                             <TableCell>
                                                 <DeleteDialog

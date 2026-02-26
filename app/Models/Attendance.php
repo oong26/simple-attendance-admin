@@ -16,6 +16,7 @@ class Attendance extends Model
         'clock_out_time',
         'status',
         'attendance_type',
+        'leave_type',
         'late_minutes',
         'late_deduction',
         'note',

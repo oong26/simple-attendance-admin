@@ -136,6 +136,7 @@ class AttendanceController extends Controller
     {
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
+            'leave_type' => 'required|in:cuti,izin',
             'date' => 'required|date',
             'note' => 'nullable|string',
             'is_arrive_late' => 'nullable|boolean',
@@ -152,6 +153,7 @@ class AttendanceController extends Controller
             $this->attendance->store([
                 'employee_id' => $validated['employee_id'],
                 'date' => $validated['date'],
+                'leave_type' => $validated['leave_type'],
                 'status' => $status,
                 'note' => $validated['note'] ?? null,
                 'clock_in_time' => null,

@@ -27,10 +27,38 @@ class RolePermissionSeeder extends Seeder
         $adminPermissions = [
             'dashboard.view',
 
+            'monitor.view',
+
+            'departments.view',
+            'departments.create',
+            'departments.edit',
+            'departments.delete',
+
+            'employees.view',
+            'employees.create',
+            'employees.edit',
+            'employees.delete',
+
+            'holidays.view',
+            'holidays.create',
+            'holidays.edit',
+            'holidays.delete',
+
+            'attendances.view',
+            'attendances.create',
+            'attendances.edit',
+            'attendances.delete',
+
+            'monthly-report.view',
+
             'users.view',
             'users.create',
             'users.edit',
             'users.delete',
+
+            'late-deductions.view',
+            'late-deductions.create',
+            'late-deductions.delete',
 
             'roles.view',
             'roles.create',

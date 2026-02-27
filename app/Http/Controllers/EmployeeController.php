@@ -14,7 +14,12 @@ class EmployeeController extends Controller
     public function __construct(
         protected EmployeeInterface $employee,
         protected DepartmentInterface $department
-    ) {}
+    ) {
+        $this->middleware('permission:employees.view')->only(['index', 'verifyFace', 'verifyFaceGlobal']);
+        $this->middleware('permission:employees.create')->only(['create', 'store', 'updateFace']);
+        $this->middleware('permission:employees.edit')->only(['edit', 'update', 'updateFace']);
+        $this->middleware('permission:employees.delete')->only(['destroy']);
+    }
 
     public function index(Request $request)
     {

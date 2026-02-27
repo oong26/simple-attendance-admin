@@ -13,6 +13,10 @@ class HolidayController extends Controller
 {
     public function __construct(protected HolidayInterface $holiday)
     {
+        $this->middleware('permission:holidays.view')->only(['index']);
+        $this->middleware('permission:holidays.create')->only(['create', 'store', 'synchronize']);
+        $this->middleware('permission:holidays.edit')->only(['edit', 'update', 'synchronize']);
+        $this->middleware('permission:holidays.delete')->only(['destroy']);
     }
 
     public function index(Request $request)

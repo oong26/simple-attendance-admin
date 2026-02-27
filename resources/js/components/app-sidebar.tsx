@@ -24,11 +24,9 @@ import users from '@/routes/users';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
     Building2,
     Calendar,
     ClipboardList,
-    Folder,
     Globe,
     GlobeLock,
     KeyRound,
@@ -50,31 +48,37 @@ const mainNavItems: NavItem[] = [
         title: 'Monitor',
         href: attendance && attendance.monitor ? attendance.monitor() : '#', // Safety check if route not yet generated
         icon: ClipboardList,
+        permission: 'monitor.view',
     },
     {
         title: 'Departments',
         href: departments ? departments.index() : '#',
         icon: Building2,
+        permission: 'departments.view',
     },
     {
         title: 'Employees',
         href: employees ? employees.index() : '#',
         icon: Users,
+        permission: 'employees.view'
     },
     {
         title: 'Holidays',
         href: holidays ? holidays.index() : '#',
         icon: Calendar,
+        permission: 'holidays.view',
     },
     {
         title: 'Attendance',
         href: attendances ? attendances.index() : '#',
         icon: ClipboardList,
+        permission: 'attendances.view',
     },
     {
         title: 'Monthly Report',
         href: '/reports/monthly-attendance',
         icon: Calendar,
+        permission: 'monthly-report.view',
     },
     {
         title: 'Users',
@@ -86,9 +90,10 @@ const mainNavItems: NavItem[] = [
 
 const settingNavItems: NavItem[] = [
     {
-        title: 'Master Late Deductions',
+        title: 'Late Deductions',
         href: '/late-deductions',
         icon: SettingsIcon,
+        permission: 'late-deductions.view',
     },
     {
         title: 'Role & Permission',

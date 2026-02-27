@@ -46,6 +46,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/lib/permissions';
 import employees from '@/routes/employees';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -93,6 +94,7 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { can, canAny } = usePermission();
     const { list, q, flash, matched_employee } = usePage<any>()
         .props as PageProps & { flash: any; matched_employee: Employee | null };
     const [search, setSearch] = useState(q ?? '');
@@ -216,9 +218,11 @@ export default function Index() {
                             >
                                 Verify Face
                             </Button>
-                            <Link href={employees.create().url}>
-                                <Button>Create Employee</Button>
-                            </Link>
+                            {can('employees.create') && (
+                                <Link href={employees.create().url}>
+                                    <Button>Create Employee</Button>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
@@ -308,26 +312,30 @@ export default function Index() {
                                                     <DropdownMenuLabel>
                                                         Actions
                                                     </DropdownMenuLabel>
-                                                    <DropdownMenuItem
-                                                        onClick={() =>
-                                                            router.get(
-                                                                employees.edit.url(
-                                                                    item.id,
-                                                                ),
-                                                            )
-                                                        }
-                                                    >
-                                                        Edit
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        onClick={() =>
-                                                            setRecordingEmployeeId(
-                                                                item.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        Record Face
-                                                    </DropdownMenuItem>
+                                                    {can(['employees.create', 'employees.edit']) && (
+                                                        <>
+                                                            <DropdownMenuItem
+                                                                onClick={() =>
+                                                                    router.get(
+                                                                        employees.edit.url(
+                                                                            item.id,
+                                                                        ),
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() =>
+                                                                    setRecordingEmployeeId(
+                                                                        item.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                Record Face
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    )}
                                                     <DropdownMenuItem
                                                         onClick={() =>
                                                             setVerifyingEmployeeId(
@@ -351,20 +359,24 @@ export default function Index() {
                                                     >
                                                         Download ID Card
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        onClick={() => {
-                                                            setDeleteEmployeeId(
-                                                                item.id,
-                                                            );
-                                                            setDeleteEmployeeName(
-                                                                item.name,
-                                                            );
-                                                        }}
-                                                        className="text-red-600 focus:bg-red-50 focus:text-red-700 dark:focus:bg-red-950 dark:focus:text-red-400"
-                                                    >
-                                                        Delete
-                                                    </DropdownMenuItem>
+                                                    {can('employees.delete') && (
+                                                        <>
+                                                        <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    setDeleteEmployeeId(
+                                                                        item.id,
+                                                                    );
+                                                                    setDeleteEmployeeName(
+                                                                        item.name,
+                                                                    );
+                                                                }}
+                                                                className="text-red-600 focus:bg-red-50 focus:text-red-700 dark:focus:bg-red-950 dark:focus:text-red-400"
+                                                            >
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>

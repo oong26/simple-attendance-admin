@@ -11,25 +11,26 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LateDeductionRuleController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return redirect('/login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('dashboard', DashboardController::class)
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard');
 
     // Departments
     Route::resource('departments', DepartmentController::class);
 
     // Employees
     Route::resource('employees', EmployeeController::class);
-    Route::post('employees/{employee}/face', [EmployeeController::class, 'updateFace'])->name('employees.update-face');
+    Route::post('employees/{employee}/face', [EmployeeController::class, 'updateFace'])
+        ->name('employees.update-face');
     Route::post('employees/{employee}/verify-face', [EmployeeController::class, 'verifyFace'])->name('employees.verify-face');
     Route::post('employees/verify-face-global', [EmployeeController::class, 'verifyFaceGlobal'])->name('employees.verify-face-global');
 
@@ -39,20 +40,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('holidays.synchronize');
 
     // Attendance
-    Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
-    Route::get('attendances/leave', [AttendanceController::class, 'create'])->name('attendances.create');
-    Route::post('attendances/leave', [AttendanceController::class, 'storeLeave'])->name('attendances.store-leave');
-    Route::get('attendance/monitor', [AttendanceController::class, 'monitor'])->name('attendance.monitor');
-    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+    Route::get('attendances', [AttendanceController::class, 'index'])
+        ->middleware('permission:attendances.view')
+        ->name('attendances.index');
+    Route::get('attendances/leave', [AttendanceController::class, 'create'])
+        ->middleware('permission:attendances.create')
+        ->name('attendances.create');
+    Route::post('attendances/leave', [AttendanceController::class, 'storeLeave'])
+        ->middleware('permission:attendances.create')
+        ->name('attendances.store-leave');
+    Route::get('attendances/{attendance}/edit', [AttendanceController::class, 'edit'])
+        ->middleware('permission:attendances.edit')
+        ->name('attendances.edit');
+    Route::put('attendances/{attendance}', [AttendanceController::class, 'update'])
+        ->middleware('permission:attendances.edit')
+        ->name('attendances.update');
+    Route::get('attendance/monitor', [AttendanceController::class, 'monitor'])
+        ->middleware('permission:monitor.view')
+        ->name('attendance.monitor');
+    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])
+        ->middleware('permission:attendances.delete')
+        ->name('attendances.destroy');
 
     // Late Deduction
-    Route::resource('late-deductions', LateDeductionRuleController::class)->except(['create', 'show', 'edit']);
+    Route::resource('late-deductions', LateDeductionRuleController::class)
+        ->except(['create', 'show', 'edit']);
 
     // Reports
     Route::prefix('reports')
         ->name('reports.')
         ->group(function () {
             Route::get('monthly-attendance', [ReportController::class, 'monthlyAttendance'])
+                ->middleware('permission:monthly-report.view')
                 ->name('monthly-attendance');
         });
 

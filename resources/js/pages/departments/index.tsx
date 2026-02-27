@@ -18,6 +18,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/lib/permissions';
 import departments from '@/routes/departments';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -70,6 +71,7 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { can, canAny } = usePermission();
     const { list, q } = usePage<any>().props as PageProps;
     const [search, setSearch] = useState(q ?? '');
     const [pageLength, setPageLength] = useState(
@@ -128,9 +130,11 @@ export default function Index() {
                                 entries
                             </CardDescription>
                         </div>
-                        <Link href={departments.create().url}>
-                            <Button>Create Department</Button>
-                        </Link>
+                        {can('departments.create') && (
+                            <Link href={departments.create().url}>
+                                <Button>Create Department</Button>
+                            </Link>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -146,9 +150,11 @@ export default function Index() {
                                 <TableHead className="w-[50px]">#</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Workdays</TableHead>
-                                <TableHead className="text-center">
-                                    Action
-                                </TableHead>
+                                {canAny(['departments.edit', 'departments.delete']) && (
+                                    <TableHead className="text-center">
+                                        Action
+                                    </TableHead>
+                                )}
                             </TableRow>
                         </TableHeader>
                         {list.data.length > 0 && (
@@ -186,25 +192,29 @@ export default function Index() {
                                             </div>
                                         </TableCell>
                                         <TableCell className="space-x-2 text-center">
-                                            <DeleteDialog
-                                                itemName={item.name}
-                                                onConfirm={() =>
-                                                    destroy(
-                                                        departments.destroy.url(
-                                                            item.id,
-                                                        ),
-                                                    )
-                                                }
-                                            />
-                                            <Link
-                                                href={departments.edit.url(
-                                                    item.id,
-                                                )}
-                                            >
-                                                <Button className="bg-primary text-white dark:text-black">
-                                                    Edit
-                                                </Button>
-                                            </Link>
+                                            {can('departments.delete') && (
+                                                <DeleteDialog
+                                                    itemName={item.name}
+                                                    onConfirm={() =>
+                                                        destroy(
+                                                            departments.destroy.url(
+                                                                item.id,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
+                                            )}
+                                            {can('departments.edit') && (
+                                                <Link
+                                                    href={departments.edit.url(
+                                                        item.id,
+                                                    )}
+                                                >
+                                                    <Button className="bg-primary text-white dark:text-black">
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -214,7 +224,7 @@ export default function Index() {
                             <TableBody>
                                 <TableRow>
                                     <TableCell
-                                        colSpan={4}
+                                        colSpan={canAny(['departments.edit', 'departments.delete']) ? 4 : 3}
                                         className="text-center"
                                     >
                                         No records.

@@ -23,6 +23,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/lib/permissions';
 import { formatDate } from '@/lib/utils';
 import attendances from '@/routes/attendances';
 import { type BreadcrumbItem } from '@/types';
@@ -63,6 +64,7 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { can, canAny } = usePermission();
     const { list, employees, date, month, status } = usePage<any>().props as PageProps;
     const [pageLength, setPageLength] = useState(
         new URLSearchParams(window.location.search).get('perPage') ?? '20',
@@ -138,9 +140,11 @@ export default function Index() {
                     <h2 className="text-2xl font-bold tracking-tight">
                         Attendance
                     </h2>
-                    <Button onClick={() => router.visit(attendances.create.url())} className="bg-green-600 hover:bg-green-700 text-white">
-                        New Leave
-                    </Button>
+                    {can('attendances.create') && (
+                        <Button onClick={() => router.visit(attendances.create.url())} className="bg-green-600 hover:bg-green-700 text-white">
+                            New Leave
+                        </Button>
+                    )}
                 </div>
                 <Card>
                     <CardHeader>
@@ -253,7 +257,9 @@ export default function Index() {
                                     <TableHead>Deduction</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead>Action</TableHead>
+                                    {canAny(['attendances.edit', 'attendances.delete']) && (
+                                        <TableHead>Action</TableHead>
+                                    )}
                                 </TableRow>
                             </TableHeader>
                             {list.data.length > 0 && (
@@ -330,16 +336,29 @@ export default function Index() {
                                                     )}
                                             </TableCell>
                                             <TableCell>
-                                                <DeleteDialog
-                                                    itemName={`${item.employee.name} - ${formatDate(item.date)}`}
-                                                    onConfirm={() =>
-                                                        destroy(
-                                                            attendances.destroy.url(
-                                                                item.id,
-                                                            ),
-                                                        )
-                                                    }
-                                                />
+                                                <div className="flex gap-2 items-center">
+                                                    {(can('attendances.edit') && (item.status === 'leave' || item.status === 'arrive_late')) && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => router.visit(attendances.edit.url(item.id))}
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                    )}
+                                                    {can('attendances.delete') && (
+                                                        <DeleteDialog
+                                                            itemName={`${item.employee.name} - ${formatDate(item.date)}`}
+                                                            onConfirm={() =>
+                                                                destroy(
+                                                                    attendances.destroy.url(
+                                                                        item.id,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                    )}
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -349,7 +368,7 @@ export default function Index() {
                                 <TableBody>
                                     <TableRow>
                                         <TableCell
-                                            colSpan={7}
+                                            colSpan={canAny(['attendances.edit', 'attendances.delete']) ? 7 : 6}
                                             className="text-center"
                                         >
                                             No records found.

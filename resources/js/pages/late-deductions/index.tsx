@@ -1,3 +1,4 @@
+import DeleteDialog from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -25,14 +26,15 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/lib/permissions';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Master Late Deductions',
+        title: 'Late Deductions',
         href: '/late-deductions',
     },
 ];
@@ -46,6 +48,8 @@ interface LateDeductionRule {
 }
 
 export default function Index() {
+    const { can } = usePermission();
+    const [open, setOpen] = useState(false);
     const { rules } = usePage<any>().props as { rules: LateDeductionRule[] };
     const { data, setData, post, processing, reset, errors } = useForm({
         amount_per_minute: '',
@@ -55,7 +59,10 @@ export default function Index() {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/late-deductions', {
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                reset();
+                setOpen(false);
+            },
         });
     };
 
@@ -71,14 +78,12 @@ export default function Index() {
     };
 
     const deleteRule = (id: number) => {
-        if (confirm('Are you sure you want to delete this rule?')) {
-            router.delete(`/late-deductions/${id}`, { preserveScroll: true });
-        }
+        router.delete(`/late-deductions/${id}`, { preserveScroll: true });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Master Late Deductions" />
+            <Head title="Late Deductions" />
             <div className="m-4 flex flex-col gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -90,65 +95,67 @@ export default function Index() {
                                 active.
                             </CardDescription>
                         </div>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button>
-                                    <Plus className="mr-2 h-4 w-4" /> Add Rule
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Add New Deduction Rule
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={submit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="amount_per_minute">
-                                            Amount Per Minute (IDR)
-                                        </Label>
-                                        <Input
-                                            id="amount_per_minute"
-                                            type="number"
-                                            min="0"
-                                            value={data.amount_per_minute}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'amount_per_minute',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            required
-                                        />
-                                        {errors.amount_per_minute && (
-                                            <p className="text-sm text-red-500">
-                                                {errors.amount_per_minute}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Switch
-                                            id="is_active"
-                                            checked={data.is_active}
-                                            onCheckedChange={(checked) =>
-                                                setData('is_active', checked)
-                                            }
-                                        />
-                                        <Label htmlFor="is_active">
-                                            Set as Active immediately
-                                        </Label>
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                        >
-                                            Save
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                        {can('late-deductions.create') && (
+                            <Dialog open={open} onOpenChange={setOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <Plus className="mr-2 h-4 w-4" /> Add Rule
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Add New Deduction Rule
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={submit} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="amount_per_minute">
+                                                Amount Per Minute (IDR)
+                                            </Label>
+                                            <Input
+                                                id="amount_per_minute"
+                                                type="number"
+                                                min="0"
+                                                value={data.amount_per_minute}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'amount_per_minute',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                required
+                                            />
+                                            {errors.amount_per_minute && (
+                                                <p className="text-sm text-red-500">
+                                                    {errors.amount_per_minute}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch
+                                                id="is_active"
+                                                checked={data.is_active}
+                                                onCheckedChange={(checked) =>
+                                                    setData('is_active', checked)
+                                                }
+                                            />
+                                            <Label htmlFor="is_active">
+                                                Set as Active immediately
+                                            </Label>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                Save
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        )}
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -160,9 +167,11 @@ export default function Index() {
                                     <TableHead className="text-center">
                                         Active
                                     </TableHead>
-                                    <TableHead className="text-right">
-                                        Actions
-                                    </TableHead>
+                                    {can('late-deductions.delete') && (
+                                        <TableHead className="text-right">
+                                            Actions
+                                        </TableHead>
+                                    )}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -189,30 +198,29 @@ export default function Index() {
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <Switch
+                                                disabled={!can('late-deductions.create')}
                                                 checked={rule.is_active}
                                                 onCheckedChange={(checked) =>
                                                     toggleActive(rule, checked)
                                                 }
                                             />
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() =>
-                                                    deleteRule(rule.id)
-                                                }
-                                                className="text-red-500 hover:bg-red-50 hover:text-red-700"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
+                                        {can('late-deductions.delete') && (
+                                            <TableCell className="text-right">
+                                                <DeleteDialog
+                                                    itemName="this rule"
+                                                    onConfirm={() =>
+                                                        deleteRule(rule.id)
+                                                    }
+                                                />
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 ))}
                                 {rules.length === 0 && (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={5}
+                                            colSpan={can('late-deductions.delete') ? 5 : 4}
                                             className="text-center"
                                         >
                                             No rules found.

@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class LateDeductionRuleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:late-deductions.view')->only(['index']);
+        $this->middleware('permission:late-deductions.create')->only(['store']);
+        $this->middleware('permission:late-deductions.delete')->only(['destroy']);
+    }
+
     public function index()
     {
         $rules = LateDeductionRule::orderBy('created_at', 'desc')->get();

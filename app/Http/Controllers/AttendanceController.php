@@ -13,7 +13,13 @@ use App\Interfaces\AttendanceInterface;
 
 class AttendanceController extends Controller
 {
-    public function __construct(protected AttendanceInterface $attendance) {}
+    public function __construct(protected AttendanceInterface $attendance) {
+        $this->middleware('permission:attendances.view')->only(['index']);
+        $this->middleware('permission:attendances.create')->only(['create', 'storeLeave']);
+        $this->middleware('permission:attendances.edit')->only(['edit', 'update']);
+        $this->middleware('permission:attendances.delete')->only(['destroy']);
+        $this->middleware('permission:monitor.view')->only(['monitor']);
+    }
     /**
      * Reporting & History
      */
@@ -170,6 +176,70 @@ class AttendanceController extends Controller
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error', 'Failed to submit leave request.'));
+        }
+    }
+
+    /**
+     * Edit Leave Request
+     */
+    public function edit(Attendance $attendance)
+    {
+        if (!in_array($attendance->status, ['leave', 'arrive_late'])) {
+            return redirect()->route('attendances.index')->with('flash', $this->flashMessage('error', 'Only leave or arrive late requests can be edited.'));
+        }
+
+        $employees = Employee::orderBy('name')->where('is_active', true)->get(['id', 'name']);
+        $holidays = \App\Models\Holiday::all(['date', 'name'])->map(function ($holiday) {
+            return [
+                'date' => Carbon::parse($holiday->date)->format('Y-m-d'),
+                'name' => $holiday->name
+            ];
+        });
+
+        return Inertia::render('attendances/edit', compact('attendance', 'employees', 'holidays'));
+    }
+
+    /**
+     * Update Leave Request
+     */
+    public function update(Request $request, Attendance $attendance)
+    {
+        if (!in_array($attendance->status, ['leave', 'arrive_late'])) {
+            return redirect()->route('attendances.index')->with('flash', $this->flashMessage('error', 'Only leave or arrive late requests can be updated.'));
+        }
+
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'leave_type' => 'required|in:cuti,izin',
+            'date' => 'required|date',
+            'note' => 'nullable|string',
+            'is_arrive_late' => 'nullable|boolean',
+        ]);
+
+        $isHoliday = \App\Models\Holiday::whereDate('date', $validated['date'])->first();
+        if ($isHoliday) {
+            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: ' . $isHoliday->name]);
+        }
+
+        try {
+            $status = !empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
+
+            $this->attendance->update($attendance->id, [
+                'employee_id' => $validated['employee_id'],
+                'date' => $validated['date'],
+                'leave_type' => $validated['leave_type'],
+                'status' => $status,
+                'note' => $validated['note'] ?? null,
+            ]);
+
+            return redirect()
+                ->route('attendances.index')
+                ->with('flash', $this->flashMessage('success', 'Successfully updated leave request.'));
+        } catch (Exception $e) {
+            Log::error('Attendance Update Leave Error: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('flash', $this->flashMessage('error', 'Failed to update leave request.'));
         }
     }
 }

@@ -92,15 +92,29 @@ export default function MonthlyReport() {
     };
 
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value; setFilterStartDate(val); applyFilter(val, filterEndDate, filterDepartment);
+        const val = e.target.value;
+        setFilterStartDate(val);
     };
 
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value; setFilterEndDate(val); applyFilter(filterStartDate, val, filterDepartment);
+        const val = e.target.value;
+        setFilterEndDate(val);
     };
 
     const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value; setFilterDepartment(val); applyFilter(filterStartDate, filterEndDate, val);
+        const val = e.target.value;
+        setFilterDepartment(val);
+    };
+
+    const applyFilters = () => {
+        applyFilter(filterStartDate, filterEndDate, filterDepartment);
+    };
+
+    const clearFilters = () => {
+        setFilterStartDate('');
+        setFilterEndDate('');
+        setFilterDepartment('');
+        router.get('/reports/monthly-attendance');
     };
 
     // Calculate Employee Summary
@@ -355,6 +369,10 @@ export default function MonthlyReport() {
                                     <NativeSelectOption key={dept.id} value={dept.id}>{dept.name}</NativeSelectOption>
                                 ))}
                             </NativeSelect>
+                        </div>
+                        <div className="flex justify-end gap-2 sm:col-span-2 lg:col-span-1">
+                            <Button onClick={applyFilters}>Filter</Button>
+                            <Button variant="outline" onClick={clearFilters}>Clear</Button>
                         </div>
                     </CardContent>
                 </Card>

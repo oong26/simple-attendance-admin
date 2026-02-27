@@ -63,10 +63,6 @@ export default function Monitor() {
     const { stats, attendances, notInEmployees } = usePage<any>()
         .props as PageProps;
 
-    const refresh = () => {
-        router.reload();
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Real-time Monitor" />
@@ -75,10 +71,6 @@ export default function Monitor() {
                     <h2 className="text-2xl font-bold tracking-tight">
                         Today's Overview
                     </h2>
-                    <Button variant="outline" size="sm" onClick={refresh}>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh
-                    </Button>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -14,6 +14,7 @@ class ReportController extends Controller
     public function __construct(ReportInterface $reportRepository)
     {
         $this->reportRepository = $reportRepository;
+        $this->middleware('permission:monthly-report.view')->only(['monthlyAttendance']);
     }
 
     public function monthlyAttendance(Request $request)

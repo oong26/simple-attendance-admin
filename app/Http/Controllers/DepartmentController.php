@@ -12,7 +12,12 @@ class DepartmentController extends Controller
 {
     public function __construct(
         protected DepartmentInterface $department
-    ) {}
+    ) {
+        $this->middleware('permission:departments.view')->only(['index']);
+        $this->middleware('permission:departments.create')->only(['create', 'store']);
+        $this->middleware('permission:departments.edit')->only(['edit', 'update']);
+        $this->middleware('permission:departments.delete')->only(['destroy']);
+    }
 
     public function index(Request $request)
     {

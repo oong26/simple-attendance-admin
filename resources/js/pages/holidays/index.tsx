@@ -18,6 +18,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/lib/permissions';
 import holidays from '@/routes/holidays';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -43,6 +44,7 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { can, canAny } = usePermission();
     const { list, q } = usePage<any>().props as PageProps;
     const [search, setSearch] = useState(q ?? '');
     const [pageLength, setPageLength] = useState(
@@ -115,18 +117,22 @@ export default function Index() {
                             </CardDescription>
                         </div>
                         <div className="space-x-2">
-                            <Button
-                                variant="outline"
-                                onClick={handleSynchronize}
-                                disabled={syncing}
-                            >
-                                {syncing
-                                    ? 'Syncing...'
-                                    : 'Sync National Holidays'}
-                            </Button>
-                            <Link href={holidays.create().url}>
-                                <Button>Create Holiday</Button>
-                            </Link>
+                            {canAny(['holidays.create', 'holidays.edit']) && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleSynchronize}
+                                    disabled={syncing}
+                                >
+                                    {syncing
+                                        ? 'Syncing...'
+                                        : 'Sync National Holidays'}
+                                </Button>
+                            )}
+                            {can('holidays.create') && (
+                                <Link href={holidays.create().url}>
+                                    <Button>Create Holiday</Button>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
@@ -144,6 +150,7 @@ export default function Index() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Recurring</TableHead>
+                                {canAny(['holidays.edit', 'holidays.delete'])}
                                 <TableHead className="text-center">
                                     Action
                                 </TableHead>
@@ -162,25 +169,29 @@ export default function Index() {
                                             {item.is_recurring ? 'Yes' : 'No'}
                                         </TableCell>
                                         <TableCell className="space-x-2 text-center">
-                                            <DeleteDialog
-                                                itemName={item.name}
-                                                onConfirm={() =>
-                                                    destroy(
-                                                        holidays.destroy.url(
-                                                            item.id,
-                                                        ),
-                                                    )
-                                                }
-                                            />
-                                            <Link
-                                                href={holidays.edit.url(
-                                                    item.id,
-                                                )}
-                                            >
-                                                <Button className="bg-primary text-white dark:text-black">
-                                                    Edit
-                                                </Button>
-                                            </Link>
+                                            {can('holidays.edit') && (
+                                                <DeleteDialog
+                                                    itemName={item.name}
+                                                    onConfirm={() =>
+                                                        destroy(
+                                                            holidays.destroy.url(
+                                                                item.id,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
+                                            )}
+                                            {can('holidays.edit') && (
+                                                <Link
+                                                    href={holidays.edit.url(
+                                                        item.id,
+                                                    )}
+                                                >
+                                                    <Button className="bg-primary text-white dark:text-black">
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -190,7 +201,7 @@ export default function Index() {
                             <TableBody>
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={canAny(['holidays.edit', 'holidays.delete']) ? 5 : 4}
                                         className="text-center"
                                     >
                                         No records.

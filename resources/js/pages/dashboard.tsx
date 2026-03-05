@@ -8,10 +8,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { formatDate, formatDateTime } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { CalendarCheck, ClockAlert, UserCheck, Users } from 'lucide-react';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,10 +41,16 @@ interface DashboardProps {
         status: string;
         late_minutes: number;
     }>;
+    charts: {
+        by_contract: Array<{ name: string; value: number }>;
+        by_attendance: Array<{ name: string; value: number }>;
+    };
 }
 
 export default function Dashboard() {
-    const { stats, recentLogs } = usePage<any>().props as DashboardProps;
+    const { stats, recentLogs, charts } = usePage<any>().props as DashboardProps;
+
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -126,6 +134,72 @@ export default function Dashboard() {
                     </Card>
                 </div>
 
+                {/* Charts */}
+                <div className="grid gap-4 md:grid-cols-2">
+                    <Card className="flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Employees by Contract Type</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 flex items-center justify-center min-h-[300px]">
+                            {charts.by_contract.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={charts.by_contract}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={90}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            label
+                                        >
+                                            {charts.by_contract.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <p className="text-muted-foreground">No data available</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <Card className="flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Employees by Attendance Type</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 flex items-center justify-center min-h-[300px]">
+                            {charts.by_attendance.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={charts.by_attendance}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={90}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            label
+                                        >
+                                            {charts.by_attendance.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <p className="text-muted-foreground">No data available</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* Recent Logs Table */}
                 <Card className="flex flex-1 flex-col">
                     <CardHeader>
@@ -156,15 +230,12 @@ export default function Dashboard() {
                                                 {log.employee.department
                                                     ?.name || '-'}
                                             </TableCell>
-                                            <TableCell>{log.date}</TableCell>
+                                            <TableCell>{formatDate(log.date)}</TableCell>
                                             <TableCell>
                                                 {log.clock_in_time ? (
                                                     <div className="whitespace-nowrap">
                                                         <span>
-                                                            {log.clock_in_time.substring(
-                                                                0,
-                                                                5,
-                                                            )}
+                                                            {formatDateTime(log.clock_in_time)}
                                                         </span>
                                                         {log.late_minutes >
                                                             0 && (
@@ -183,10 +254,7 @@ export default function Dashboard() {
                                             </TableCell>
                                             <TableCell>
                                                 {log.clock_out_time
-                                                    ? log.clock_out_time.substring(
-                                                          0,
-                                                          5,
-                                                      )
+                                                    ? formatDateTime(log.clock_out_time)
                                                     : '-'}
                                             </TableCell>
                                             <TableCell className="text-right">

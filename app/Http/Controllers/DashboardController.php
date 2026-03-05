@@ -29,9 +29,33 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
+        $employeesByContract = Employee::selectRaw('contract_type as name, count(*) as value')
+            ->groupBy('contract_type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => ucfirst((string) ($item->name ?? 'Unknown')),
+                    'value' => (int) $item->value
+                ];
+            });
+
+        $employeesByAttendance = Employee::selectRaw('attendance_type as name, count(*) as value')
+            ->groupBy('attendance_type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => ucfirst((string) ($item->name ?? 'Unknown')),
+                    'value' => (int) $item->value
+                ];
+            });
+
         return Inertia::render('dashboard', [
             'stats' => $stats,
             'recentLogs' => $recentLogs,
+            'charts' => [
+                'by_contract' => $employeesByContract,
+                'by_attendance' => $employeesByAttendance,
+            ],
         ]);
     }
 }

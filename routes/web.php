@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiKeyController;
-use App\Http\Controllers\DeductionSettingController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Systems\ApiSessionController;
 use App\Http\Controllers\Systems\SessionController;

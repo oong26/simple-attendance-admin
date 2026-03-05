@@ -312,7 +312,7 @@ export default function Index() {
                                                     <DropdownMenuLabel>
                                                         Actions
                                                     </DropdownMenuLabel>
-                                                    {can(['employees.create', 'employees.edit']) && (
+                                                    {canAny(['employees.create', 'employees.edit']) && (
                                                         <>
                                                             <DropdownMenuItem
                                                                 onClick={() =>

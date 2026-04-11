@@ -34,6 +34,7 @@ export default function Edit() {
         email: employee.email ?? '',
         phone: employee.phone ?? '',
         department_id: employee.department_id ?? '',
+        job_title: employee.job_title ?? '',
         contract_type: employee.contract_type ?? '',
         attendance_type: employee.attendance_type ?? '',
         contract_end_date: employee.contract_end_date ? employee.contract_end_date.split('T')[0] : '', // Get YYYY-MM-DD
@@ -85,24 +86,23 @@ export default function Edit() {
                         className="space-y-4"
                         encType="multipart/form-data"
                     >
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(e) =>
-                                    setData('name', e.target.value)
-                                }
-                                required
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-500">
-                                    {errors.name}
-                                </p>
-                            )}
-                        </div>
-
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.name && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.name}
+                                    </p>
+                                )}
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -119,6 +119,9 @@ export default function Edit() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone</Label>
                                 <Input
@@ -131,6 +134,22 @@ export default function Edit() {
                                 {errors.phone && (
                                     <p className="text-sm text-red-500">
                                         {errors.phone}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="job_title">Job Title</Label>
+                                <Input
+                                    id="job_title"
+                                    type="text"
+                                    value={data.job_title}
+                                    onChange={(e) =>
+                                        setData('job_title', e.target.value)
+                                    }
+                                />
+                                {errors.job_title && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.job_title}
                                     </p>
                                 )}
                             </div>

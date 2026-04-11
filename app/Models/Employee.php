@@ -15,6 +15,7 @@ class Employee extends Model
         'email',
         'phone',
         'department_id',
+        'job_title',
         'face_embedding',
         'photo',
         'photo_url',

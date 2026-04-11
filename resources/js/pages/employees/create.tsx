@@ -14,6 +14,7 @@ import {
     NativeSelect,
     NativeSelectOption,
 } from '@/components/ui/native-select';
+import { RequiredLabel } from '@/components/ui/required-label';
 import AppLayout from '@/layouts/app-layout';
 import employees from '@/routes/employees';
 import { type BreadcrumbItem } from '@/types';
@@ -42,6 +43,7 @@ export default function Create() {
         email: '',
         phone: '',
         department_id: '',
+        job_title: '',
         contract_type: '',
         attendance_type: '',
         contract_end_date: '',
@@ -81,24 +83,23 @@ export default function Create() {
                         className="space-y-4"
                         encType="multipart/form-data"
                     >
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(e) =>
-                                    setData('name', e.target.value)
-                                }
-                                required
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-500">
-                                    {errors.name}
-                                </p>
-                            )}
-                        </div>
-
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <RequiredLabel htmlFor="name">Name</RequiredLabel>
+                                <Input
+                                    id="name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.name && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.name}
+                                    </p>
+                                )}
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -115,6 +116,9 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone</Label>
                                 <Input
@@ -127,6 +131,22 @@ export default function Create() {
                                 {errors.phone && (
                                     <p className="text-sm text-red-500">
                                         {errors.phone}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="job_title">Job Title</Label>
+                                <Input
+                                    id="job_title"
+                                    type="text"
+                                    value={data.job_title}
+                                    onChange={(e) =>
+                                        setData('job_title', e.target.value)
+                                    }
+                                />
+                                {errors.job_title && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.job_title}
                                     </p>
                                 )}
                             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Employee\CheckQrCodeAction;
 use App\Interfaces\DepartmentInterface;
 use App\Interfaces\EmployeeInterface;
 use Exception;
@@ -53,6 +54,7 @@ class EmployeeController extends Controller
                 'email' => 'nullable|email|max:255|unique:employees,email',
                 'phone' => 'nullable|string|max:20',
                 'department_id' => 'nullable|exists:departments,id',
+                'job_title' => 'nullable|string|max:100',
                 'photo' => 'nullable|image|max:2048', // 2MB Max
                 'face_photo' => 'nullable|image|max:2048',
                 'face_embedding' => 'nullable|array',
@@ -98,6 +100,7 @@ class EmployeeController extends Controller
                 'email' => 'nullable|email|max:255|unique:employees,email,'.$id,
                 'phone' => 'nullable|string|max:20',
                 'department_id' => 'nullable|exists:departments,id',
+                'job_title' => 'nullable|string|max:100',
                 'photo' => 'nullable|image|max:2048',
                 'face_photo' => 'nullable|image|max:2048',
                 'face_embedding' => 'nullable|array',
@@ -236,58 +239,8 @@ class EmployeeController extends Controller
         }
     }
 
-    public function checkQrCode(Request $request)
+    public function checkQrCode(Request $request, CheckQrCodeAction $action)
     {
-        try {
-            $request->validate([
-                'qr_data' => 'required|string',
-            ]);
-
-            $payload = json_decode($request->qr_data, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE || ! isset($payload['employee_id'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid QR code format. Expected JSON with employee_id.',
-                ], 422);
-            }
-
-            $employee = \App\Models\Employee::with(['department.shift'])
-                ->find($payload['employee_id']);
-
-            if (! $employee) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'QR code is not registered to any employee.',
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'employee' => [
-                    'id' => $employee->id,
-                    'name' => $employee->name,
-                    'email' => $employee->email,
-                    'phone' => $employee->phone,
-                    'photo_url' => $employee->photo_url,
-                    'is_active' => $employee->is_active,
-                    'department' => $employee->department ? [
-                        'name' => $employee->department->name,
-                        'shift' => $employee->department->shift ? [
-                            'name' => $employee->department->shift->name,
-                            'start_time' => $employee->department->shift->start_time,
-                            'end_time' => $employee->department->shift->end_time,
-                        ] : null,
-                    ] : null,
-                ],
-            ]);
-        } catch (Exception $e) {
-            Log::error('Employee Check QR Code Error: '.$e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error while checking QR code.',
-            ], 500);
-        }
+        return $action->execute($request);
     }
 }

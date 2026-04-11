@@ -78,6 +78,7 @@ interface Employee {
             end_time: string;
         } | null;
     } | null;
+    job_title: string | null;
     photo_url: string | null;
     is_active: boolean;
     shift?: {
@@ -248,6 +249,7 @@ export default function Index() {
                                 <TableHead>Photo</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Department</TableHead>
+                                <TableHead>Job Title</TableHead>
                                 <TableHead>Shift</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-center">
@@ -289,6 +291,9 @@ export default function Index() {
                                         </TableCell>
                                         <TableCell>
                                             {item.department?.name ?? '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.job_title ?? '-'}
                                         </TableCell>
                                         <TableCell>
                                             {item.department?.shift?.name ??
@@ -396,7 +401,7 @@ export default function Index() {
                             <TableBody>
                                 <TableRow>
                                     <TableCell
-                                        colSpan={7}
+                                        colSpan={8}
                                         className="text-center"
                                     >
                                         No records.

@@ -18,10 +18,10 @@ class AuthController extends Controller
         [$customer, $token] = $service->handle($request->validated());
 
         return response()->json([
-            'success'  => true,
-            'message'  => 'Registered successfully.',
-            'token'    => $token,
-            'customer' => new CustomerResource($customer)
+            'success' => true,
+            'message' => 'Registered successfully.',
+            'token' => $token,
+            'customer' => new CustomerResource($customer),
         ]);
     }
 
@@ -39,10 +39,10 @@ class AuthController extends Controller
 
         // Success
         return response()->json([
-            'success'  => true,
-            'message'  => 'Login successful.',
-            'token'    => $result['token'],
-            'customer' => new CustomerResource($result['customer'])
+            'success' => true,
+            'message' => 'Login successful.',
+            'token' => $result['token'],
+            'customer' => new CustomerResource($result['customer']),
         ]);
     }
 
@@ -57,8 +57,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Logged out successfully'
+            'message' => 'Logged out successfully',
         ]);
     }
 }
-

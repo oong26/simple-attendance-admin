@@ -5,34 +5,36 @@ namespace App\Repositories;
 use App\Interfaces\DepartmentInterface;
 use App\Models\Department;
 
-class DepartmentRepository implements DepartmentInterface {
+class DepartmentRepository implements DepartmentInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
         $data = Department::when($name, function ($query) use ($name) {
-                $query->where('name', 'LIKE', "%$name%");
-            })
+            $query->where('name', 'LIKE', "%$name%");
+        })
             ->latest();
         if ($pagination) {
             return $data->paginate($perPage);
         }
+
         return $data->get();
     }
 
-    public function store($form): Department|null
+    public function store($form): ?Department
     {
         return Department::create($form);
     }
 
-    public function getById($id): object|null
+    public function getById($id): ?object
     {
         return Department::find($id);
     }
 
-    public function update($id, $form): Department|null
+    public function update($id, $form): ?Department
     {
         $department = Department::find($id);
-        if (!$department) {
+        if (! $department) {
             return null;
         }
         $department->update($form);

@@ -37,7 +37,7 @@ class LoginService
 
         return [
             'customer' => $customer,
-            'token'    => $tokenObj->plainTextToken,
+            'token' => $tokenObj->plainTextToken,
         ];
     }
 

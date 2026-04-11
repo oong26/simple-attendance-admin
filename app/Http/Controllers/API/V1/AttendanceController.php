@@ -8,9 +8,9 @@ use App\Models\Employee;
 use App\Models\LateDeductionRule;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class AttendanceController extends Controller
 {
@@ -19,13 +19,13 @@ class AttendanceController extends Controller
         try {
             $today = Carbon::today()->toDateString();
             $now = Carbon::now();
-            
+
             // 1. Holiday Check
             $holiday = \App\Models\Holiday::where('date', $today)
-                ->orWhere(function($q) {
+                ->orWhere(function ($q) {
                     $q->where('is_recurring', true)
-                      ->whereMonth('date', Carbon::today()->month)
-                      ->whereDay('date', Carbon::today()->day);
+                        ->whereMonth('date', Carbon::today()->month)
+                        ->whereDay('date', Carbon::today()->day);
                 })->first();
 
             // 2. Schedule Check (Default to first department for global kiosk context)
@@ -33,18 +33,19 @@ class AttendanceController extends Controller
             $todayDayName = $now->format('l');
             $workdays = $department?->workdays ?? [];
             $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
-            $isDayOff = !$todaySchedule || !isset($todaySchedule['is_working']) || !$todaySchedule['is_working'];
+            $isDayOff = ! $todaySchedule || ! isset($todaySchedule['is_working']) || ! $todaySchedule['is_working'];
 
             return response()->json([
                 'success' => true,
-                'is_holiday' => !!$holiday,
+                'is_holiday' => (bool) $holiday,
                 'holiday_name' => $holiday ? $holiday->name : null,
                 'is_day_off' => $isDayOff,
                 'schedule' => $todaySchedule,
                 'server_time' => $now->toDateTimeString(),
             ]);
         } catch (Exception $e) {
-            Log::error('API Today Attendance Error: ' . $e->getMessage());
+            Log::error('API Today Attendance Error: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Server Error'], 500);
         }
     }
@@ -63,7 +64,7 @@ class AttendanceController extends Controller
 
             $totalWorkDays = $attendances->count();
             $onTimeCount = $attendances->where('status', 'present')->count();
-            
+
             $punctuality = 0;
             if ($totalWorkDays > 0) {
                 $punctuality = round(($onTimeCount / $totalWorkDays) * 100);
@@ -75,11 +76,11 @@ class AttendanceController extends Controller
 
             foreach ($attendances as $att) {
                 $dateObj = Carbon::parse($att->date);
-                
+
                 $inTimeStr = null;
                 $outTimeStr = null;
                 $hoursStr = '-';
-                
+
                 if ($att->clock_in_time) {
                     $inTimeStr = Carbon::parse($att->clock_in_time)->format('h:i A');
                 }
@@ -91,12 +92,12 @@ class AttendanceController extends Controller
                     $in = Carbon::parse($att->clock_in_time);
                     $out = Carbon::parse($att->clock_out_time);
                     $diffMins = $in->diffInMinutes($out);
-                    
+
                     $totalMinutesWorked += $diffMins;
-                    
+
                     $h = floor($diffMins / 60);
                     $m = $diffMins % 60;
-                    $hoursStr = "{$h}h " . str_pad($m, 2, '0', STR_PAD_LEFT) . "m";
+                    $hoursStr = "{$h}h ".str_pad($m, 2, '0', STR_PAD_LEFT).'m';
                 }
 
                 // Map status
@@ -106,7 +107,7 @@ class AttendanceController extends Controller
                     'absent' => 'absent',
                     'leave' => 'leave',
                 ];
-                
+
                 $uiStatus = $statusMap[$att->status] ?? 'on-time';
 
                 // Icons configuration
@@ -143,8 +144,11 @@ class AttendanceController extends Controller
             // Trend is mock logic for demonstration
             // In a real app we'd query last month to calculate string +4.2%
             $punctualityLabel = 'Good';
-            if ($punctuality >= 95) $punctualityLabel = 'Excellent';
-            elseif ($punctuality < 80) $punctualityLabel = 'Needs Improvement';
+            if ($punctuality >= 95) {
+                $punctualityLabel = 'Excellent';
+            } elseif ($punctuality < 80) {
+                $punctualityLabel = 'Needs Improvement';
+            }
 
             return response()->json([
                 'success' => true,
@@ -155,10 +159,11 @@ class AttendanceController extends Controller
                     'punctuality' => $punctuality,
                     'punctuality_label' => $punctualityLabel,
                 ],
-                'logs' => $formattedLogs
+                'logs' => $formattedLogs,
             ]);
         } catch (Exception $e) {
-            Log::error('API History Error: ' . $e->getMessage());
+            Log::error('API History Error: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Server Error'], 500);
         }
     }
@@ -167,11 +172,11 @@ class AttendanceController extends Controller
     {
         try {
             $department = \App\Models\Department::first();
-            
-            if (!$department) {
+
+            if (! $department) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No department found.'
+                    'message' => 'No department found.',
                 ], 404);
             }
 
@@ -181,10 +186,11 @@ class AttendanceController extends Controller
                     'id' => $department->id,
                     'name' => $department->name,
                     'workdays' => $department->workdays ?? [],
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('API Department Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('API Department Error: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Server Error'], 500);
         }
     }
@@ -200,26 +206,26 @@ class AttendanceController extends Controller
 
             $employee = Employee::with('department')->find($request->employee_id);
 
-            if (!$employee->is_active) {
+            if (! $employee->is_active) {
                 return response()->json(['message' => 'Employee is inactive'], 403);
             }
 
             // Face Verification
             if ($request->has('face_embedding') && $request->face_embedding) {
-                if (!$employee->face_embedding) {
+                if (! $employee->face_embedding) {
                     return response()->json(['message' => 'Face not registered for this employee'], 400);
                 }
 
                 $inputEmbedding = $request->face_embedding;
                 $dbEmbedding = $employee->face_embedding;
 
-                if (count($inputEmbedding) !== 128 || !is_array($dbEmbedding) || count($dbEmbedding) !== 128) {
+                if (count($inputEmbedding) !== 128 || ! is_array($dbEmbedding) || count($dbEmbedding) !== 128) {
                     return response()->json(['message' => 'Invalid embedding structure'], 400);
                 }
 
                 $distance = 0;
                 for ($i = 0; $i < 128; $i++) {
-                    $distance += pow((float)$inputEmbedding[$i] - (float)$dbEmbedding[$i], 2);
+                    $distance += pow((float) $inputEmbedding[$i] - (float) $dbEmbedding[$i], 2);
                 }
                 $distance = sqrt($distance);
 
@@ -243,19 +249,19 @@ class AttendanceController extends Controller
             // Calculate Late
             $status = 'present';
             $lateMinutes = 0;
-            
+
             $todayDayName = Carbon::now()->format('l');
             $workdays = $employee->department?->workdays ?? [];
             $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
 
-            if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && !empty($todaySchedule['start_time'])) {
-                $shiftStart = Carbon::parse($today . ' ' . $todaySchedule['start_time']);
-                
+            if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && ! empty($todaySchedule['start_time'])) {
+                $shiftStart = Carbon::parse($today.' '.$todaySchedule['start_time']);
+
                 // Grace Period
                 $gracePeriod = $employee->grace_period_minutes;
                 if ($gracePeriod === null) {
                     $globalSetting = Setting::where('key', 'global_grace_period')->first();
-                    $gracePeriod = $globalSetting ? (int)$globalSetting->value : 0;
+                    $gracePeriod = $globalSetting ? (int) $globalSetting->value : 0;
                 }
 
                 $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
@@ -280,7 +286,8 @@ class AttendanceController extends Controller
             ]);
 
         } catch (Exception $e) {
-            Log::error('API ClockIn Error: ' . $e->getMessage());
+            Log::error('API ClockIn Error: '.$e->getMessage());
+
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
@@ -297,20 +304,20 @@ class AttendanceController extends Controller
 
             // Face Verification
             if ($request->has('face_embedding') && $request->face_embedding) {
-                if (!$employee->face_embedding) {
+                if (! $employee->face_embedding) {
                     return response()->json(['message' => 'Face not registered for this employee'], 400);
                 }
 
                 $inputEmbedding = $request->face_embedding;
                 $dbEmbedding = $employee->face_embedding;
 
-                if (count($inputEmbedding) !== 128 || !is_array($dbEmbedding) || count($dbEmbedding) !== 128) {
+                if (count($inputEmbedding) !== 128 || ! is_array($dbEmbedding) || count($dbEmbedding) !== 128) {
                     return response()->json(['message' => 'Invalid embedding structure'], 400);
                 }
 
                 $distance = 0;
                 for ($i = 0; $i < 128; $i++) {
-                    $distance += pow((float)$inputEmbedding[$i] - (float)$dbEmbedding[$i], 2);
+                    $distance += pow((float) $inputEmbedding[$i] - (float) $dbEmbedding[$i], 2);
                 }
                 $distance = sqrt($distance);
 
@@ -326,7 +333,7 @@ class AttendanceController extends Controller
                 ->where('date', $today)
                 ->first();
 
-            if (!$attendance) {
+            if (! $attendance) {
                 return response()->json(['message' => 'No attendance record found for today'], 404);
             }
 
@@ -344,7 +351,8 @@ class AttendanceController extends Controller
             ]);
 
         } catch (Exception $e) {
-            Log::error('API ClockOut Error: ' . $e->getMessage());
+            Log::error('API ClockOut Error: '.$e->getMessage());
+
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
@@ -361,18 +369,18 @@ class AttendanceController extends Controller
                 ->where('is_active', true)
                 ->whereNotNull('face_embedding')
                 ->get();
-            
+
             $bestMatch = null;
             $bestDistance = 1.0;
             $threshold = 0.45;
 
             foreach ($employees as $employee) {
                 $dbEmbedding = $employee->face_embedding;
-                
+
                 if (is_array($dbEmbedding) && count($dbEmbedding) === 128) {
                     $distance = 0;
                     for ($i = 0; $i < 128; $i++) {
-                        $distance += pow((float)$inputEmbedding[$i] - (float)$dbEmbedding[$i], 2);
+                        $distance += pow((float) $inputEmbedding[$i] - (float) $dbEmbedding[$i], 2);
                     }
                     $distance = sqrt($distance);
 
@@ -383,16 +391,16 @@ class AttendanceController extends Controller
                 }
             }
 
-            if (!$bestMatch || $bestDistance > $threshold) {
+            if (! $bestMatch || $bestDistance > $threshold) {
                 return response()->json(['message' => 'Face not recognized'], 401);
             }
 
             // Contract Expiry Check
-            if ($bestMatch->contract_type !== 'full_time' && !is_null($bestMatch->contract_end_date)) {
+            if ($bestMatch->contract_type !== 'full_time' && ! is_null($bestMatch->contract_end_date)) {
                 $contractEnd = Carbon::parse($bestMatch->contract_end_date)->startOfDay();
                 if ($contractEnd->lt(Carbon::today())) {
                     return response()->json([
-                        'message' => 'Your contract expired on ' . $contractEnd->format('d M Y') . '. Please contact HR.'
+                        'message' => 'Your contract expired on '.$contractEnd->format('d M Y').'. Please contact HR.',
                     ], 403);
                 }
             }
@@ -402,15 +410,15 @@ class AttendanceController extends Controller
 
             // Holiday Check
             $holiday = \App\Models\Holiday::where('date', $today)
-                ->orWhere(function($q) {
+                ->orWhere(function ($q) {
                     $q->where('is_recurring', true)
-                      ->whereMonth('date', Carbon::today()->month)
-                      ->whereDay('date', Carbon::today()->day);
+                        ->whereMonth('date', Carbon::today()->month)
+                        ->whereDay('date', Carbon::today()->day);
                 })->first();
 
             if ($holiday) {
                 return response()->json([
-                    'message' => 'Today is a holiday (' . $holiday->name . '). Attendance is disabled.'
+                    'message' => 'Today is a holiday ('.$holiday->name.'). Attendance is disabled.',
                 ], 403);
             }
 
@@ -420,21 +428,21 @@ class AttendanceController extends Controller
                 ->first();
 
             // CLOCK IN LOGIC
-            if (!$attendance || ($attendance && $attendance->status === 'arrive_late' && !$attendance->clock_in_time)) {
+            if (! $attendance || ($attendance && $attendance->status === 'arrive_late' && ! $attendance->clock_in_time)) {
                 $status = 'present';
                 $lateMinutes = 0;
-                
+
                 $todayDayName = Carbon::now()->format('l');
                 $workdays = $bestMatch->department?->workdays ?? [];
                 $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
 
-                if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && !empty($todaySchedule['start_time'])) {
-                    $shiftStart = Carbon::parse($today . ' ' . $todaySchedule['start_time']);
-                    
+                if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && ! empty($todaySchedule['start_time'])) {
+                    $shiftStart = Carbon::parse($today.' '.$todaySchedule['start_time']);
+
                     $gracePeriod = $bestMatch->grace_period_minutes;
                     if ($gracePeriod === null) {
                         $globalSetting = Setting::where('key', 'global_grace_period')->first();
-                        $gracePeriod = $globalSetting ? (int)$globalSetting->value : 0;
+                        $gracePeriod = $globalSetting ? (int) $globalSetting->value : 0;
                     }
 
                     $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
@@ -492,7 +500,7 @@ class AttendanceController extends Controller
             }
 
             // CLOCK OUT LOGIC
-            if ($attendance && !$attendance->clock_out_time) {
+            if ($attendance && ! $attendance->clock_out_time) {
                 $attendance->update([
                     'clock_out_time' => $now->toTimeString(),
                 ]);
@@ -509,11 +517,12 @@ class AttendanceController extends Controller
             return response()->json([
                 'message' => 'Already clocked out today',
                 'action' => 'completed',
-                'employee_name' => $bestMatch->name
+                'employee_name' => $bestMatch->name,
             ], 400);
 
         } catch (Exception $e) {
-            Log::error('API ClockByFace Error: ' . $e->getMessage());
+            Log::error('API ClockByFace Error: '.$e->getMessage());
+
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
@@ -527,28 +536,28 @@ class AttendanceController extends Controller
 
             $qrData = json_decode($request->qrcode_data, true);
 
-            if (!$qrData || !isset($qrData['employee_id'])) {
+            if (! $qrData || ! isset($qrData['employee_id'])) {
                 return response()->json(['message' => 'Invalid QR Code data'], 400);
             }
 
             $employeeId = $qrData['employee_id'];
-            
+
             $employee = Employee::with('department')->find($employeeId);
 
-            if (!$employee) {
+            if (! $employee) {
                 return response()->json(['message' => 'Employee not found'], 404);
             }
 
-            if (!$employee->is_active) {
+            if (! $employee->is_active) {
                 return response()->json(['message' => 'Employee is inactive'], 403);
             }
 
             // Contract Expiry Check
-            if ($employee->contract_type !== 'full_time' && !is_null($employee->contract_end_date)) {
+            if ($employee->contract_type !== 'full_time' && ! is_null($employee->contract_end_date)) {
                 $contractEnd = Carbon::parse($employee->contract_end_date)->startOfDay();
                 if ($contractEnd->lt(Carbon::today())) {
                     return response()->json([
-                        'message' => 'Your contract expired on ' . $contractEnd->format('d M Y') . '. Please contact HR.'
+                        'message' => 'Your contract expired on '.$contractEnd->format('d M Y').'. Please contact HR.',
                     ], 403);
                 }
             }
@@ -558,15 +567,15 @@ class AttendanceController extends Controller
 
             // Holiday Check
             $holiday = \App\Models\Holiday::where('date', $today)
-                ->orWhere(function($q) {
+                ->orWhere(function ($q) {
                     $q->where('is_recurring', true)
-                      ->whereMonth('date', Carbon::today()->month)
-                      ->whereDay('date', Carbon::today()->day);
+                        ->whereMonth('date', Carbon::today()->month)
+                        ->whereDay('date', Carbon::today()->day);
                 })->first();
 
             if ($holiday) {
                 return response()->json([
-                    'message' => 'Today is a holiday (' . $holiday->name . '). Attendance is disabled.'
+                    'message' => 'Today is a holiday ('.$holiday->name.'). Attendance is disabled.',
                 ], 403);
             }
 
@@ -576,21 +585,21 @@ class AttendanceController extends Controller
                 ->first();
 
             // CLOCK IN LOGIC
-            if (!$attendance || ($attendance && $attendance->status === 'arrive_late' && !$attendance->clock_in_time)) {
+            if (! $attendance || ($attendance && $attendance->status === 'arrive_late' && ! $attendance->clock_in_time)) {
                 $status = 'present';
                 $lateMinutes = 0;
-                
+
                 $todayDayName = Carbon::now()->format('l');
                 $workdays = $employee->department?->workdays ?? [];
                 $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
 
-                if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && !empty($todaySchedule['start_time'])) {
-                    $shiftStart = Carbon::parse($today . ' ' . $todaySchedule['start_time']);
-                    
+                if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && ! empty($todaySchedule['start_time'])) {
+                    $shiftStart = Carbon::parse($today.' '.$todaySchedule['start_time']);
+
                     $gracePeriod = $employee->grace_period_minutes;
                     if ($gracePeriod === null) {
                         $globalSetting = Setting::where('key', 'global_grace_period')->first();
-                        $gracePeriod = $globalSetting ? (int)$globalSetting->value : 0;
+                        $gracePeriod = $globalSetting ? (int) $globalSetting->value : 0;
                     }
 
                     $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriod);
@@ -648,7 +657,7 @@ class AttendanceController extends Controller
             }
 
             // CLOCK OUT LOGIC
-            if ($attendance && !$attendance->clock_out_time) {
+            if ($attendance && ! $attendance->clock_out_time) {
                 $attendance->update([
                     'clock_out_time' => $now->toTimeString(),
                 ]);
@@ -665,11 +674,12 @@ class AttendanceController extends Controller
             return response()->json([
                 'message' => 'Already clocked out today',
                 'action' => 'completed',
-                'employee_name' => $employee->name
+                'employee_name' => $employee->name,
             ], 400);
 
         } catch (Exception $e) {
-            Log::error('API ClockByQrcode Error: ' . $e->getMessage());
+            Log::error('API ClockByQrcode Error: '.$e->getMessage());
+
             return response()->json(['message' => 'Server Error'], 500);
         }
     }

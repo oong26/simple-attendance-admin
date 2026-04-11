@@ -6,18 +6,19 @@ use App\Interfaces\RolePermissionInterface;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class RolePermissionRepository implements RolePermissionInterface {
-    
+class RolePermissionRepository implements RolePermissionInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
         $data = Role::when($name, function ($query) use ($name) {
-                $query->where('name', 'LIKE', "%$name%");
-            })
+            $query->where('name', 'LIKE', "%$name%");
+        })
             ->latest();
         if ($pagination) {
             return $data->paginate($perPage);
         }
+
         return $data->get();
     }
 
@@ -25,8 +26,8 @@ class RolePermissionRepository implements RolePermissionInterface {
     {
         $name = $filter['q'] ?? null;
         $data = Permission::when($name, function ($query) use ($name) {
-                $query->where('name', 'LIKE', "%$name%");
-            })
+            $query->where('name', 'LIKE', "%$name%");
+        })
             ->latest();
         if ($pagination) {
             return $data->paginate($perPage);
@@ -54,34 +55,37 @@ class RolePermissionRepository implements RolePermissionInterface {
 
             return $groups;
         }
+
         return $data->get();
     }
 
-    public function store($form): Role|null
+    public function store($form): ?Role
     {
         $form['name'] = strtolower($form['name']);
         $role = Role::create($form);
-        if (!empty($form['permissions'])) {
+        if (! empty($form['permissions'])) {
             $role->givePermissionTo($form['permissions']);
         }
+
         return $role;
     }
 
-    public function getById($id, bool $withPermission = false): Role|null
+    public function getById($id, bool $withPermission = false): ?Role
     {
         $relations = $withPermission ? ['permissions:id,name,guard_name'] : [];
+
         return Role::with($relations)->find($id);
     }
 
-    public function update($id, $form): Role|null
+    public function update($id, $form): ?Role
     {
         $role = Role::find($id);
-        if (!$role) {
+        if (! $role) {
             return null;
         }
         // Update role name
         $role->update([
-            'name' => strtolower($form['name'])
+            'name' => strtolower($form['name']),
         ]);
 
         // Sync permissions (best practice)

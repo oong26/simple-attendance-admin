@@ -10,10 +10,10 @@ class RegisterService
     public function handle(array $data)
     {
         $customer = Customer::create([
-            'name'       => $data['name'],
+            'name' => $data['name'],
             'phone_code' => $data['phone_code'],
-            'phone'      => $data['phone'],
-            'password'   => Hash::make($data['password']),
+            'phone' => $data['phone'],
+            'password' => Hash::make($data['password']),
         ]);
 
         return [$customer];

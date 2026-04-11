@@ -1,17 +1,17 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\LateDeductionRuleController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Systems\ApiSessionController;
 use App\Http\Controllers\Systems\SessionController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\HolidayController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\LateDeductionRuleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +27,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('departments', DepartmentController::class);
 
     // Employees
+    Route::post('employees/check-qrcode', [EmployeeController::class, 'checkQrCode'])
+        ->name('employees.check-qrcode');
     Route::resource('employees', EmployeeController::class);
     Route::post('employees/{employee}/face', [EmployeeController::class, 'updateFace'])
         ->name('employees.update-face');
@@ -162,7 +164,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('api-keys.regenerate');
     Route::prefix('session')
         ->name('session.')
-        ->group(function() {
+        ->group(function () {
             Route::get('', [SessionController::class, 'index'])
                 ->middleware('permission:sessions.view')
                 ->name('index');
@@ -172,7 +174,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     Route::prefix('api-session')
         ->name('api-session.')
-        ->group(function() {
+        ->group(function () {
             Route::get('', [ApiSessionController::class, 'index'])
                 ->middleware('permission:api-sessions.view')
                 ->name('index');

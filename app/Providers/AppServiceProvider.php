@@ -12,8 +12,8 @@ use App\Repositories\ApiSessionRepository;
 use App\Repositories\RolePermissionRepository;
 use App\Repositories\SessionRepository;
 use App\Repositories\UserRepository;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

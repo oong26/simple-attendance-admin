@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\ReportInterface;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -22,7 +22,7 @@ class ReportController extends Controller
         $startDate = $request->get('start_date', Carbon::today()->locale('id_ID')->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::today()->locale('id_ID')->endOfMonth()->format('Y-m-d'));
         $departmentId = $request->get('department_id') ? (int) $request->get('department_id') : null;
-        
+
         $data = $this->reportRepository->monthlyAttendance($startDate, $endDate, $departmentId);
 
         return Inertia::render('reports/monthly', [

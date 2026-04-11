@@ -14,9 +14,9 @@ class ApiSessionRepository implements ApiSessionInterface
             ->whereNotNull('tokenable_id')
             ->orderByDesc('last_used_at');
 
-        if (!empty($filter['q'])) {
+        if (! empty($filter['q'])) {
             $q = $filter['q'];
-            $query->whereHas('customer', fn($qf) => $qf->where('name', 'like', "%$q%"));
+            $query->whereHas('customer', fn ($qf) => $qf->where('name', 'like', "%$q%"));
         }
 
         if ($pagination) {
@@ -30,7 +30,7 @@ class ApiSessionRepository implements ApiSessionInterface
     {
         $session = PersonalAccessToken::find($id);
 
-        if (!$session) {
+        if (! $session) {
             return false;
         }
 

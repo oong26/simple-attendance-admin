@@ -4,12 +4,12 @@ namespace App\Repositories;
 
 use App\Interfaces\ReportInterface;
 use App\Models\Attendance;
-use App\Models\Employee;
 use App\Models\Department;
+use App\Models\Employee;
 use Carbon\Carbon;
 
-class ReportRepository implements ReportInterface {
-    
+class ReportRepository implements ReportInterface
+{
     public function monthlyAttendance(string $startDate, string $endDate, ?int $departmentId = null): array
     {
         // Parse the dates
@@ -20,23 +20,23 @@ class ReportRepository implements ReportInterface {
             $start = Carbon::today()->locale('id_ID')->startOfMonth();
             $end = Carbon::today()->locale('id_ID')->endOfMonth();
         }
-        
+
         // Retrieve all active employees, filtered by department if selected
         $employees = Employee::with('department')
-            ->when($departmentId, function($q) use ($departmentId) {
+            ->when($departmentId, function ($q) use ($departmentId) {
                 $q->where('department_id', $departmentId);
             })
             ->orderBy('name')
             ->get();
-        
+
         // Extract IDs of filtered employees to narrow down attendance queries
         $employeeIds = $employees->pluck('id')->toArray();
-        
+
         // Retrieve all attendances for the given date range
         $attendances = Attendance::whereBetween('date', [$start->format('Y-m-d'), $end->format('Y-m-d')])
             ->whereIn('employee_id', $employeeIds)
             ->get();
-        
+
         // Group the attendances: attendanceMap[Y-m-d][employee_id] = Attendance Model
         $attendanceMap = [];
         foreach ($attendances as $att) {
@@ -55,10 +55,10 @@ class ReportRepository implements ReportInterface {
         $holidaysData = \App\Models\Holiday::whereBetween('date', [$start->format('Y-m-d'), $end->format('Y-m-d')])
             ->orWhere(function ($query) use ($start, $end) {
                 $query->where('is_recurring', true)
-                      // A simplistic approach that works for typical 1-month ranges, but let's just 
+                      // A simplistic approach that works for typical 1-month ranges, but let's just
                       // assume anything overlapping the month(s) of the range is considered.
                       // For simplicity, we just pull recurring holidays and filter exactly below.
-                      ->whereIn(\DB::raw('MONTH(date)'), [$start->month, $end->month]);
+                    ->whereIn(\DB::raw('MONTH(date)'), [$start->month, $end->month]);
             })->get();
 
         $holidays = [];
@@ -105,7 +105,7 @@ class ReportRepository implements ReportInterface {
                 'is_sunday' => $isSunday,
                 'holidays' => $dayHolidays,
             ];
-            
+
             $current->addDay();
         }
 
@@ -114,17 +114,17 @@ class ReportRepository implements ReportInterface {
         foreach ($sundayMap as $monthName => $days) {
             $holidaysSummary[] = [
                 'name' => 'Hari Minggu',
-                'dates' => implode(', ', $days) . ' ' . $monthName,
-                'total' => count($days)
+                'dates' => implode(', ', $days).' '.$monthName,
+                'total' => count($days),
             ];
         }
-        
+
         foreach ($otherHolidaysGrouped as $hName => $monthsMap) {
             foreach ($monthsMap as $monthName => $days) {
                 $holidaysSummary[] = [
                     'name' => $hName,
-                    'dates' => implode(', ', $days) . ' ' . $monthName,
-                    'total' => count($days)
+                    'dates' => implode(', ', $days).' '.$monthName,
+                    'total' => count($days),
                 ];
             }
         }
@@ -134,7 +134,7 @@ class ReportRepository implements ReportInterface {
         return [
             'startDate' => $start->format('Y-m-d'),
             'endDate' => $end->format('Y-m-d'),
-            'monthName' => $start->translatedFormat('d M Y') . ' - ' . $end->translatedFormat('d M Y'), // Fallback generic name
+            'monthName' => $start->translatedFormat('d M Y').' - '.$end->translatedFormat('d M Y'), // Fallback generic name
             'departments' => $departments,
             'employees' => $employees,
             'attendanceMap' => $attendanceMap,

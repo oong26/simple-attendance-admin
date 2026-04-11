@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
-use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
 test('login screen can be rendered', function () {
@@ -56,7 +55,7 @@ test('users are rate limited', function () {
     ]);
 
     // Fortify throttle key format:
-    $throttleKey = strtolower($email) . '|' . $ip;
+    $throttleKey = strtolower($email).'|'.$ip;
 
     // Exceed limit (5 per minute)
     for ($i = 0; $i < 10; $i++) {

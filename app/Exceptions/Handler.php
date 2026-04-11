@@ -18,7 +18,7 @@ class Handler extends ExceptionHandler
             if ($e instanceof AuthenticationException) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthenticated.'
+                    'message' => 'Unauthenticated.',
                 ], 401);
             }
 
@@ -26,7 +26,7 @@ class Handler extends ExceptionHandler
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation error',
-                    'errors'  => $e->errors(),
+                    'errors' => $e->errors(),
                 ], 422);
             }
 

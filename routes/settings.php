@@ -6,7 +6,6 @@ use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SettingsIndexController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
     Route::get('settings', SettingsIndexController::class)
@@ -31,7 +30,7 @@ Route::middleware('auth')->group(function () {
         ->middleware(['throttle:6,1', 'permission:settings.password.update'])
         ->name('user-password.update');
 
-Route::get('settings/appearance', [AppearanceController::class, 'index'])
+    Route::get('settings/appearance', [AppearanceController::class, 'index'])
         ->middleware('permission:settings.appearance.update')
         ->name('appearance.edit');
 

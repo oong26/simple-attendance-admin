@@ -17,7 +17,7 @@ Route::middleware(['api-key'])
             Route::get('/profile', [AuthController::class, 'profile']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });
-        
+
         // Attendance Routes
         Route::prefix('attendance')
             ->group(function () {

@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Interfaces\AttendanceInterface;
 use App\Models\Attendance;
 use App\Models\Employee;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 use Exception;
-use App\Interfaces\AttendanceInterface;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class AttendanceController extends Controller
 {
-    public function __construct(protected AttendanceInterface $attendance) {
+    public function __construct(protected AttendanceInterface $attendance)
+    {
         $this->middleware('permission:attendances.view')->only(['index']);
         $this->middleware('permission:attendances.create')->only(['create', 'storeLeave']);
         $this->middleware('permission:attendances.edit')->only(['edit', 'update']);
         $this->middleware('permission:attendances.delete')->only(['destroy']);
         $this->middleware('permission:monitor.view')->only(['monitor']);
     }
+
     /**
      * Reporting & History
      */
@@ -31,7 +33,7 @@ class AttendanceController extends Controller
             $employeeId = $request->get('employee_id');
             $status = $request->get('status');
             $perPage = $request->get('perPage', 20);
-            
+
             $query = Attendance::with(['employee.department']);
 
             if ($month) {
@@ -53,7 +55,8 @@ class AttendanceController extends Controller
 
             return Inertia::render('attendances/index', compact('list', 'date', 'month', 'status', 'employees'));
         } catch (Exception $e) {
-            Log::error('Attendance Index Error: ' . $e->getMessage());
+            Log::error('Attendance Index Error: '.$e->getMessage());
+
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
         }
     }
@@ -69,8 +72,7 @@ class AttendanceController extends Controller
             return redirect()
                 ->route('attendances.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully deleting attendance'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('attendances.index')
                 ->with('flash', $this->flashMessage('error'));
@@ -84,7 +86,7 @@ class AttendanceController extends Controller
     {
         try {
             $today = Carbon::today()->toDateString();
-            
+
             // Get all active employees
             $totalEmployees = Employee::where('is_active', true)->count();
 
@@ -95,12 +97,12 @@ class AttendanceController extends Controller
 
             $presentCount = $attendances->where('status', '!=', 'absent')->count();
             $lateCount = $attendances->where('status', 'late')->count();
-            
+
             // "Not In" are those who haven't clocked in yet
             // This is roughly Total - Present (assuming no specific "Absent" record is created until end of day or manual)
             // Or we can list specific employees who are not in.
             $clockedInEmployeeIds = $attendances->pluck('employee_id')->toArray();
-            
+
             $notInEmployees = Employee::with(['department'])
                 ->where('is_active', true)
                 ->whereNotIn('id', $clockedInEmployeeIds)
@@ -115,7 +117,8 @@ class AttendanceController extends Controller
 
             return Inertia::render('attendances/monitor', compact('stats', 'attendances', 'notInEmployees'));
         } catch (Exception $e) {
-            Log::error('Attendance Monitor Error: ' . $e->getMessage());
+            Log::error('Attendance Monitor Error: '.$e->getMessage());
+
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
         }
     }
@@ -129,9 +132,10 @@ class AttendanceController extends Controller
         $holidays = \App\Models\Holiday::all(['date', 'name'])->map(function ($holiday) {
             return [
                 'date' => Carbon::parse($holiday->date)->format('Y-m-d'),
-                'name' => $holiday->name
+                'name' => $holiday->name,
             ];
         });
+
         return Inertia::render('attendances/leave', compact('employees', 'holidays'));
     }
 
@@ -150,11 +154,11 @@ class AttendanceController extends Controller
 
         $isHoliday = \App\Models\Holiday::whereDate('date', $validated['date'])->first();
         if ($isHoliday) {
-            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: ' . $isHoliday->name]);
+            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: '.$isHoliday->name]);
         }
 
         try {
-            $status = !empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
+            $status = ! empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
 
             $this->attendance->store([
                 'employee_id' => $validated['employee_id'],
@@ -172,7 +176,8 @@ class AttendanceController extends Controller
                 ->route('attendances.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully submitted leave request.'));
         } catch (Exception $e) {
-            Log::error('Attendance Store Leave Error: ' . $e->getMessage());
+            Log::error('Attendance Store Leave Error: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error', 'Failed to submit leave request.'));
@@ -184,7 +189,7 @@ class AttendanceController extends Controller
      */
     public function edit(Attendance $attendance)
     {
-        if (!in_array($attendance->status, ['leave', 'arrive_late'])) {
+        if (! in_array($attendance->status, ['leave', 'arrive_late'])) {
             return redirect()->route('attendances.index')->with('flash', $this->flashMessage('error', 'Only leave or arrive late requests can be edited.'));
         }
 
@@ -192,7 +197,7 @@ class AttendanceController extends Controller
         $holidays = \App\Models\Holiday::all(['date', 'name'])->map(function ($holiday) {
             return [
                 'date' => Carbon::parse($holiday->date)->format('Y-m-d'),
-                'name' => $holiday->name
+                'name' => $holiday->name,
             ];
         });
 
@@ -204,7 +209,7 @@ class AttendanceController extends Controller
      */
     public function update(Request $request, Attendance $attendance)
     {
-        if (!in_array($attendance->status, ['leave', 'arrive_late'])) {
+        if (! in_array($attendance->status, ['leave', 'arrive_late'])) {
             return redirect()->route('attendances.index')->with('flash', $this->flashMessage('error', 'Only leave or arrive late requests can be updated.'));
         }
 
@@ -218,11 +223,11 @@ class AttendanceController extends Controller
 
         $isHoliday = \App\Models\Holiday::whereDate('date', $validated['date'])->first();
         if ($isHoliday) {
-            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: ' . $isHoliday->name]);
+            return redirect()->back()->withErrors(['date' => 'Selected date is a holiday: '.$isHoliday->name]);
         }
 
         try {
-            $status = !empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
+            $status = ! empty($validated['is_arrive_late']) ? 'arrive_late' : 'leave';
 
             $this->attendance->update($attendance->id, [
                 'employee_id' => $validated['employee_id'],
@@ -236,7 +241,8 @@ class AttendanceController extends Controller
                 ->route('attendances.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully updated leave request.'));
         } catch (Exception $e) {
-            Log::error('Attendance Update Leave Error: ' . $e->getMessage());
+            Log::error('Attendance Update Leave Error: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error', 'Failed to update leave request.'));

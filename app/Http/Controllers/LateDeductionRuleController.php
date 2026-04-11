@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\LateDeductionRule;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class LateDeductionRuleController extends Controller
 {
@@ -19,6 +19,7 @@ class LateDeductionRuleController extends Controller
     public function index()
     {
         $rules = LateDeductionRule::orderBy('created_at', 'desc')->get();
+
         return Inertia::render('late-deductions/index', compact('rules'));
     }
 
@@ -28,7 +29,7 @@ class LateDeductionRuleController extends Controller
             'amount_per_minute' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
-        
+
         $validated['type'] = 'per_minute';
 
         DB::transaction(function () use ($validated) {
@@ -61,6 +62,7 @@ class LateDeductionRuleController extends Controller
     public function destroy(LateDeductionRule $lateDeduction)
     {
         $lateDeduction->delete();
+
         return back()->with('flash', $this->flashMessage('success', 'Rule deleted.'));
     }
 }

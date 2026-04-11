@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 
 abstract class Controller extends BaseController
 {
-    protected function errorMessage(): String
+    protected function errorMessage(): string
     {
         $message = config('constant.error_message');
         if (empty($message)) {
             return 'Something was wrong';
         }
+
         return $message;
     }
 
@@ -21,8 +20,8 @@ abstract class Controller extends BaseController
     {
         return [
             'type' => $type,
-            'message' => $type == 'error' && !$message ? $this->errorMessage() : $message,
-            'payload' => $payload
+            'message' => $type == 'error' && ! $message ? $this->errorMessage() : $message,
+            'payload' => $payload,
         ];
     }
 }

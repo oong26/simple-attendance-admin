@@ -9,12 +9,12 @@ class DeviceService
     public function detect()
     {
         \Log::info('Getting device information...');
-        $agent = new Agent();
-        
+        $agent = new Agent;
+
         return $this->deviceInfo($agent);
     }
 
-    private function deviceInfo(Agent $agent): String
+    private function deviceInfo(Agent $agent): string
     {
         $info = [
             'device' => $agent->device(),
@@ -24,19 +24,17 @@ class DeviceService
             'is_tablet' => $agent->isTablet(),
             'is_desktop' => $agent->isDesktop(),
         ];
-        \Log::info('Device Info: '. json_encode($info));
+        \Log::info('Device Info: '.json_encode($info));
         if ($agent->isiPhone()) {
             return 'iphone';
-        }
-        elseif ($agent->isiPad()) {
+        } elseif ($agent->isiPad()) {
             return 'ipad';
-        }
-        elseif ($agent->isAndroidOS()) {
+        } elseif ($agent->isAndroidOS()) {
             return 'android';
-        }
-        elseif ($agent->isTablet()) {
+        } elseif ($agent->isTablet()) {
             return 'tablet';
         }
+
         return 'desktop';
     }
 }

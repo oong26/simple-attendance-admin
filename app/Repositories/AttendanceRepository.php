@@ -4,11 +4,10 @@ namespace App\Repositories;
 
 use App\Interfaces\AttendanceInterface;
 use App\Models\Attendance;
-use App\Models\Shift;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
-class AttendanceRepository implements AttendanceInterface {
+class AttendanceRepository implements AttendanceInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $date = $filter['date'] ?? null;
@@ -32,13 +31,14 @@ class AttendanceRepository implements AttendanceInterface {
         if ($pagination) {
             return $data->paginate($perPage);
         }
+
         return $data->get();
     }
 
     public function monitor()
     {
         $today = Carbon::today()->toDateString();
-        
+
         $stats = [
             'total_employees' => \App\Models\Employee::count(),
             'present' => Attendance::whereDate('date', $today)->where('status', '!=', 'absent')->count(),
@@ -50,29 +50,32 @@ class AttendanceRepository implements AttendanceInterface {
             ->latest('clock_in_time')
             ->take(5)
             ->get();
-            
+
         return compact('stats', 'recentClockIns');
     }
 
-    public function store($form): Attendance|null
+    public function store($form): ?Attendance
     {
         return Attendance::create($form);
     }
 
-    public function getById($id): object|null
+    public function getById($id): ?object
     {
         return Attendance::find($id);
     }
 
-    public function update($id, $form): Attendance|null
+    public function update($id, $form): ?Attendance
     {
         $attendance = Attendance::find($id);
-        if (!$attendance) return null;
+        if (! $attendance) {
+            return null;
+        }
         $attendance->update($form);
+
         return $attendance;
     }
 
-    public function delete($id): int|null
+    public function delete($id): ?int
     {
         return Attendance::destroy($id);
     }
@@ -82,34 +85,38 @@ class AttendanceRepository implements AttendanceInterface {
         // Check for existing attendance today
         $date = Carbon::parse($timestamp)->toDateString();
         $existing = Attendance::where('employee_id', $employeeId)->whereDate('date', $date)->first();
-        if ($existing) return $existing;
+        if ($existing) {
+            return $existing;
+        }
 
         $employee = \App\Models\Employee::with('department')->find($employeeId);
-        if (!$employee) return null;
+        if (! $employee) {
+            return null;
+        }
 
         // Calculate status
         $status = 'present';
         $lateMinutes = 0;
         $lateDeduction = 0;
-        
+
         $todayDayName = Carbon::parse($timestamp)->format('l');
         $workdays = $employee->department?->workdays ?? [];
         $todaySchedule = collect($workdays)->firstWhere('day', $todayDayName);
 
-        if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && !empty($todaySchedule['start_time'])) {
-            $shiftStart = Carbon::parse($date . ' ' . $todaySchedule['start_time']);
+        if ($todaySchedule && isset($todaySchedule['is_working']) && $todaySchedule['is_working'] && ! empty($todaySchedule['start_time'])) {
+            $shiftStart = Carbon::parse($date.' '.$todaySchedule['start_time']);
             $clockIn = Carbon::parse($timestamp);
-            
+
             $shiftStartSeconds = $shiftStart->secondsSinceMidnight();
             $clockInSeconds = $clockIn->secondsSinceMidnight();
-            
+
             $globalGrace = \App\Models\Setting::where('key', 'grace_period')->value('value') ?? 15;
             $graceContext = $employee->grace_period_override ?? $globalGrace;
-            
+
             if ($clockInSeconds > ($shiftStartSeconds + ($graceContext * 60)) && $employee->attendance_type === 'onsite') {
                 $status = 'late';
                 $lateMinutes = floor(($clockInSeconds - $shiftStartSeconds) / 60);
-                
+
                 $deductionRate = \App\Models\LateDeductionRule::where('is_active', true)->value('amount_per_minute') ?? \App\Models\Setting::where('key', 'late_deduction_per_minute')->value('value') ?? 0;
                 $lateDeduction = $lateMinutes * intval($deductionRate);
             }
@@ -129,11 +136,13 @@ class AttendanceRepository implements AttendanceInterface {
     {
         $date = Carbon::parse($timestamp)->toDateString();
         $attendance = Attendance::where('employee_id', $employeeId)->whereDate('date', $date)->first();
-        
+
         if ($attendance) {
             $attendance->update(['clock_out_time' => $timestamp]);
+
             return $attendance;
         }
+
         return null;
     }
 }

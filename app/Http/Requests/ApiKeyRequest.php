@@ -22,7 +22,7 @@ class ApiKeyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:api_keys,name'
+            'name' => 'required|string|unique:api_keys,name',
         ];
     }
 }

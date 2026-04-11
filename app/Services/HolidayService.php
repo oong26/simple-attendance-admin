@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 class HolidayService
 {
     private $holidayRepository;
+
     private const BASE_URL = 'https://libur.deno.dev/api';
 
     public function __construct(HolidayInterface $holidayRepository)

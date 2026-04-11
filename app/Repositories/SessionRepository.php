@@ -14,9 +14,9 @@ class SessionRepository implements SessionInterface
             ->whereNotNull('user_id')
             ->orderByDesc('last_activity');
 
-        if (!empty($filter['q'])) {
+        if (! empty($filter['q'])) {
             $q = $filter['q'];
-            $query->whereHas('user', fn($qf) => $qf->where('name', 'like', "%$q%"));
+            $query->whereHas('user', fn ($qf) => $qf->where('name', 'like', "%$q%"));
         }
 
         if ($pagination) {
@@ -30,7 +30,7 @@ class SessionRepository implements SessionInterface
     {
         $session = Session::find($id);
 
-        if (!$session) {
+        if (! $session) {
             return false;
         }
 

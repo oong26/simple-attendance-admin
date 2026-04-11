@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\DepartmentInterface;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DepartmentController extends Controller
 {
@@ -30,7 +30,8 @@ class DepartmentController extends Controller
 
             return Inertia::render('departments/index', compact('list', 'q'));
         } catch (Exception $e) {
-            Log::error('Department Error: ' . $e->getMessage());
+            Log::error('Department Error: '.$e->getMessage());
+
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
         }
     }
@@ -60,7 +61,8 @@ class DepartmentController extends Controller
             return redirect()->route('departments.index')
                 ->with('flash', $this->flashMessage('success', 'Department created successfully.'));
         } catch (Exception $e) {
-            Log::error('Department Store Error: ' . $e->getMessage());
+            Log::error('Department Store Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }
@@ -69,11 +71,12 @@ class DepartmentController extends Controller
     {
         try {
             $department = $this->department->getById($id);
+
             return Inertia::render('departments/edit', [
-                'department' => $department
+                'department' => $department,
             ]);
         } catch (Exception $e) {
-             return redirect()->route('departments.index')->with('flash', $this->flashMessage('error'));
+            return redirect()->route('departments.index')->with('flash', $this->flashMessage('error'));
         }
     }
 
@@ -81,7 +84,7 @@ class DepartmentController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:departments,name,' . $id,
+                'name' => 'required|string|max:255|unique:departments,name,'.$id,
                 'workdays' => 'nullable|array',
                 'workdays.*.day' => 'required|string|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
                 'workdays.*.is_working' => 'required|boolean',
@@ -97,7 +100,8 @@ class DepartmentController extends Controller
             return redirect()->route('departments.index')
                 ->with('flash', $this->flashMessage('success', 'Department updated successfully.'));
         } catch (Exception $e) {
-            Log::error('Department Update Error: ' . $e->getMessage());
+            Log::error('Department Update Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }
@@ -106,10 +110,12 @@ class DepartmentController extends Controller
     {
         try {
             $this->department->delete($id);
+
             return redirect()->route('departments.index')
                 ->with('flash', $this->flashMessage('success', 'Department deleted successfully.'));
         } catch (Exception $e) {
-            Log::error('Department Destroy Error: ' . $e->getMessage());
+            Log::error('Department Destroy Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }

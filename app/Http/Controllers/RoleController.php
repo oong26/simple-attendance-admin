@@ -14,12 +14,14 @@ use Inertia\Response;
 
 class RoleController extends Controller
 {
-    public function __construct(protected RolePermissionInterface $rolePermission) {
+    public function __construct(protected RolePermissionInterface $rolePermission)
+    {
         $this->middleware('permission:roles.view')->only(['index', 'show']);
         $this->middleware('permission:roles.create')->only(['create', 'store']);
         $this->middleware('permission:roles.edit')->only(['edit', 'update']);
         $this->middleware('permission:roles.delete')->only('destroy');
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -32,8 +34,7 @@ class RoleController extends Controller
             $list = $this->rolePermission->list($filter, true, $perPage);
 
             return Inertia::render('roles/index', compact('list', 'q'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Role Error');
             Log::error($e->getMessage());
 
@@ -50,9 +51,9 @@ class RoleController extends Controller
     {
         try {
             $permissions = $this->rolePermission->listPermission([], true);
+
             return Inertia::render('roles/create', compact('permissions'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Role Error');
             Log::error($e->getMessage());
 
@@ -77,8 +78,7 @@ class RoleController extends Controller
             return redirect()
                 ->route('roles.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully adding new role'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error'));
@@ -103,8 +103,7 @@ class RoleController extends Controller
             $permissions = $this->rolePermission->listPermission([], true);
 
             return Inertia::render('roles/edit', compact('role', 'permissions'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Role Error');
             Log::error($e->getMessage());
 
@@ -127,8 +126,7 @@ class RoleController extends Controller
             return redirect()
                 ->route('roles.index')
                 ->with('flash', $this->flashMessage('success', 'Role updated successfully'));
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error', 'Something went wrong'));
@@ -146,8 +144,7 @@ class RoleController extends Controller
             return redirect()
                 ->route('roles.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully deleting role'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('roles.index')
                 ->with('flash', $this->flashMessage('error'));

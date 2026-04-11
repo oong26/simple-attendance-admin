@@ -17,10 +17,11 @@ class SettingsIndexController
             ['permission' => 'settings.2fa', 'route' => 'two-factor.show'],
             ['permission' => 'settings.appearance.update', 'route' => 'appearance.edit'],
         ];
-    
+
         foreach ($routes as $item) {
             if ($user->can($item['permission'])) {
-                \Log::info('go route: ' . $item['route']);
+                \Log::info('go route: '.$item['route']);
+
                 return redirect()->route($item['route']);
             }
         }

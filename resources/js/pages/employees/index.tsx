@@ -1,5 +1,6 @@
 import { FaceCaptureDialog } from '@/components/FaceCaptureDialog';
 import { IdCardModal } from '@/components/IdCardModal';
+import { QrCodeCheckerDialog } from '@/components/QrCodeCheckerDialog';
 import TableControls from '@/components/table-controls';
 import {
     AlertDialog,
@@ -112,6 +113,7 @@ export default function Index() {
     const [isGlobalVerifying, setIsGlobalVerifying] = useState<boolean>(false);
     const [qrEmployee, setQrEmployee] = useState<Employee | null>(null);
     const [idCardEmployee, setIdCardEmployee] = useState<Employee | null>(null);
+    const [isQrCheckerOpen, setIsQrCheckerOpen] = useState<boolean>(false);
 
     // For custom delete trigger
     const [deleteEmployeeId, setDeleteEmployeeId] = useState<string | null>(
@@ -212,6 +214,12 @@ export default function Index() {
                             </CardDescription>
                         </div>
                         <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsQrCheckerOpen(true)}
+                            >
+                                Check QR Code
+                            </Button>
                             <Button
                                 variant="outline"
                                 onClick={() => setIsGlobalVerifying(true)}
@@ -476,6 +484,11 @@ export default function Index() {
                 employee={idCardEmployee}
                 open={idCardEmployee !== null}
                 onOpenChange={(v: boolean) => !v && setIdCardEmployee(null)}
+            />
+
+            <QrCodeCheckerDialog
+                open={isQrCheckerOpen}
+                onOpenChange={setIsQrCheckerOpen}
             />
 
             <Dialog

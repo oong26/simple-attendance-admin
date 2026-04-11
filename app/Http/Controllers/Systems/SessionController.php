@@ -13,7 +13,8 @@ use Inertia\Response;
 
 class SessionController extends Controller
 {
-    public function __construct(protected SessionInterface $session) {
+    public function __construct(protected SessionInterface $session)
+    {
         $this->middleware('permission:sessions.view')->only('index');
         $this->middleware('permission:sessions.deactivate')->only('deactivate');
     }
@@ -27,10 +28,10 @@ class SessionController extends Controller
             $list = $this->session->list($filter, true, $perPage);
 
             return Inertia::render('system/session/index', compact('list', 'q'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Session error');
             Log::error($e);
+
             return redirect()
                 ->route('dashboard')
                 ->with('flash', $this->flashMessage('error'));
@@ -41,18 +42,19 @@ class SessionController extends Controller
     {
         try {
             $success = $this->session->deactivate($id);
-            if (!$success) {
+            if (! $success) {
                 return redirect()
                     ->route('session.index')
                     ->with('flash', $this->flashMessage('warning', 'Failed to deactivate session'));
             }
+
             return redirect()
                 ->route('session.index')
                 ->with('flash', $this->flashMessage('success', 'Session deactivated'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('Session error');
             Log::error($e);
+
             return redirect()
                 ->route('session.index')
                 ->with('flash', $this->flashMessage('error'));

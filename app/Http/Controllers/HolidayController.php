@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\HolidayInterface;
 use App\Services\HolidayService;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class HolidayController extends Controller
 {
@@ -30,7 +30,8 @@ class HolidayController extends Controller
 
             return Inertia::render('holidays/index', compact('list', 'q'));
         } catch (Exception $e) {
-            Log::error('Holiday Error: ' . $e->getMessage());
+            Log::error('Holiday Error: '.$e->getMessage());
+
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
         }
     }
@@ -43,7 +44,7 @@ class HolidayController extends Controller
     public function store(Request $request)
     {
         try {
-             $validated = $request->validate([
+            $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'date' => 'required|date',
                 'is_recurring' => 'boolean',
@@ -54,7 +55,8 @@ class HolidayController extends Controller
             return redirect()->route('holidays.index')
                 ->with('flash', $this->flashMessage('success', 'Holiday created successfully.'));
         } catch (Exception $e) {
-            Log::error('Holiday Store Error: ' . $e->getMessage());
+            Log::error('Holiday Store Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }
@@ -62,10 +64,11 @@ class HolidayController extends Controller
     public function edit(string $id)
     {
         try {
-             $holiday = $this->holiday->getById($id);
-             return Inertia::render('holidays/edit', compact('holiday'));
+            $holiday = $this->holiday->getById($id);
+
+            return Inertia::render('holidays/edit', compact('holiday'));
         } catch (Exception $e) {
-             return redirect()->route('holidays.index')->with('flash', $this->flashMessage('error'));
+            return redirect()->route('holidays.index')->with('flash', $this->flashMessage('error'));
         }
     }
 
@@ -83,7 +86,8 @@ class HolidayController extends Controller
             return redirect()->route('holidays.index')
                 ->with('flash', $this->flashMessage('success', 'Holiday updated successfully.'));
         } catch (Exception $e) {
-            Log::error('Holiday Update Error: ' . $e->getMessage());
+            Log::error('Holiday Update Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }
@@ -92,10 +96,12 @@ class HolidayController extends Controller
     {
         try {
             $this->holiday->delete($id);
+
             return redirect()->route('holidays.index')
                 ->with('flash', $this->flashMessage('success', 'Holiday deleted successfully.'));
         } catch (Exception $e) {
-            Log::error('Holiday Destroy Error: ' . $e->getMessage());
+            Log::error('Holiday Destroy Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }
@@ -118,6 +124,7 @@ class HolidayController extends Controller
         } catch (Exception $e) {
             Log::error('DayOff Synchronize Error');
             Log::error($e);
+
             return redirect()
                 ->route('holidays.index')
                 ->with('flash', $this->flashMessage('error', 'Failed to synchronize national holidays'));

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use \Carbon\Carbon;
 
 class Session extends Model
 {
     protected $primaryKey = 'id';
+
     public $incrementing = false;
+
     public $timestamps = false;
 
     protected $fillable = [

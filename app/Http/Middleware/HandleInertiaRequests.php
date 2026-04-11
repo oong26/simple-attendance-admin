@@ -50,7 +50,7 @@ class HandleInertiaRequests extends Middleware
 
                     // Add permissions from Spatie
                     'permissions' => $request->user()->getAllPermissions()->pluck('name'),
-                    'roles'       => $request->user()->getRoleNames(),
+                    'roles' => $request->user()->getRoleNames(),
                 ] : null,
             ],
             'flash' => [

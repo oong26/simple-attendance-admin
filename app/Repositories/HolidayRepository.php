@@ -5,35 +5,37 @@ namespace App\Repositories;
 use App\Interfaces\HolidayInterface;
 use App\Models\Holiday;
 
-class HolidayRepository implements HolidayInterface {
+class HolidayRepository implements HolidayInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
         $data = Holiday::when($name, function ($query) use ($name) {
-                $query->where('name', 'LIKE', "%$name%");
-            })
+            $query->where('name', 'LIKE', "%$name%");
+        })
             ->orWhere('date', 'LIKE', "%$name%")
             ->orderBy('date', 'desc');
         if ($pagination) {
             return $data->paginate($perPage);
         }
+
         return $data->get();
     }
 
-    public function store($form): Holiday|null
+    public function store($form): ?Holiday
     {
         return Holiday::create($form);
     }
 
-    public function getById($id): object|null
+    public function getById($id): ?object
     {
         return Holiday::find($id);
     }
 
-    public function update($id, $form): Holiday|null
+    public function update($id, $form): ?Holiday
     {
         $holiday = Holiday::find($id);
-        if (!$holiday) {
+        if (! $holiday) {
             return null;
         }
         $holiday->update($form);

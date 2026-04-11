@@ -7,7 +7,8 @@ use App\Interfaces\UserInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class UserRepository implements UserInterface {
+class UserRepository implements UserInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
@@ -26,28 +27,30 @@ class UserRepository implements UserInterface {
                 fn ($user) => UserResource::make($user)->toArray(request())
             );
         }
+
         return $data->get()->map(
             fn ($user) => UserResource::make($user)->toArray(request())
         );
     }
 
-    public function store($form): User|null
+    public function store($form): ?User
     {
         $form['password'] = Hash::make('12345678');
+
         return User::create($form);
     }
 
-    public function getById($id): object|null
+    public function getById($id): ?object
     {
         return (object) UserResource::make(User::with('roles:id,name,guard_name')
             ->find($id))
             ->toArray(request());
     }
 
-    public function update($id, $form): User|null
+    public function update($id, $form): ?User
     {
         $user = User::find($id);
-        if (!$user) {
+        if (! $user) {
             return null;
         }
         $user->update($form);

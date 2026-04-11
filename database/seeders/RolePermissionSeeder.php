@@ -3,24 +3,24 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
         $superadmin = Role::where('name', 'superadmin')->first();
-        $admin      = Role::where('name', 'admin')->first();
-        $staff      = Role::where('name', 'staff')->first();
+        $admin = Role::where('name', 'admin')->first();
+        $staff = Role::where('name', 'staff')->first();
 
-        /** 
-         * SUPERADMIN = ALL PERMISSIONS 
+        /**
+         * SUPERADMIN = ALL PERMISSIONS
          */
         $superadmin->syncPermissions(Permission::all());
 
         /**
-         * ADMIN PERMISSIONS 
+         * ADMIN PERMISSIONS
          * Can view + manage users, roles, API keys, sessions, settings
          * But cannot edit permissions themselves (security practice)
          */
@@ -82,7 +82,7 @@ class RolePermissionSeeder extends Seeder
         $admin->syncPermissions($adminPermissions);
 
         /**
-         * STAFF PERMISSIONS 
+         * STAFF PERMISSIONS
          * Usually limited to viewing data + maybe editing profile
          */
         $staffPermissions = [

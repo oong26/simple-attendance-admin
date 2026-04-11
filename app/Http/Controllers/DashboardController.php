@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -35,7 +35,7 @@ class DashboardController extends Controller
             ->map(function ($item) {
                 return [
                     'name' => ucfirst((string) ($item->name ?? 'Unknown')),
-                    'value' => (int) $item->value
+                    'value' => (int) $item->value,
                 ];
             });
 
@@ -45,7 +45,7 @@ class DashboardController extends Controller
             ->map(function ($item) {
                 return [
                     'name' => ucfirst((string) ($item->name ?? 'Unknown')),
-                    'value' => (int) $item->value
+                    'value' => (int) $item->value,
                 ];
             });
 

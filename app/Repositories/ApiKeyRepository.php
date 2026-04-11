@@ -6,17 +6,19 @@ use App\Interfaces\ApiKeyInterface;
 use App\Models\ApiKey;
 use Illuminate\Support\Facades\Hash;
 
-class ApiKeyRepository implements ApiKeyInterface {
+class ApiKeyRepository implements ApiKeyInterface
+{
     public function list(array $filter = [], bool $pagination = false, int $perPage = 10)
     {
         $name = $filter['q'] ?? null;
         $data = ApiKey::when($name, function ($query) use ($name) {
-                $query->where('name', 'LIKE', "%$name%");
-            })
+            $query->where('name', 'LIKE', "%$name%");
+        })
             ->latest();
         if ($pagination) {
             return $data->paginate($perPage);
         }
+
         return $data->get();
     }
 
@@ -26,9 +28,9 @@ class ApiKeyRepository implements ApiKeyInterface {
 
         // Save only the hashed key
         $apiKey = ApiKey::create([
-            'name'     => $form['name'],
+            'name' => $form['name'],
             'key_hash' => Hash::make($rawKey),
-            'state'    => true, // optional default
+            'state' => true, // optional default
         ]);
 
         // Return model + raw key so controller can show once
@@ -38,15 +40,15 @@ class ApiKeyRepository implements ApiKeyInterface {
         ];
     }
 
-    public function getById($id): ApiKey|null
+    public function getById($id): ?ApiKey
     {
         return ApiKey::find($id);
     }
 
-    public function update($id, $form): ApiKey|null
+    public function update($id, $form): ?ApiKey
     {
         $apiKey = ApiKey::find($id);
-        if (!$apiKey) {
+        if (! $apiKey) {
             return null;
         }
         $apiKey->update($form);
@@ -63,11 +65,11 @@ class ApiKeyRepository implements ApiKeyInterface {
     {
         $apiKey = ApiKey::findOrFail($id);
 
-        $apiKey->state = !$apiKey->state;
+        $apiKey->state = ! $apiKey->state;
         $apiKey->save();
     }
 
-    public function regenerate($id): string|null
+    public function regenerate($id): ?string
     {
         $apiKey = ApiKey::findOrFail($id);
 

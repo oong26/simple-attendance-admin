@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use Illuminate\Auth\Events\Authenticated;
 use App\Services\DeviceService;
+use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Support\Facades\DB;
 
 class StoreUserDevice
@@ -20,7 +20,7 @@ class StoreUserDevice
         \Log::info('Login listener');
         $device = $this->deviceService->detect();
 
-        \Log::info('Session ID: ' . session()->getId());
+        \Log::info('Session ID: '.session()->getId());
         DB::table('sessions')
             ->where('id', session()->getId())
             ->update(['device' => $device]);

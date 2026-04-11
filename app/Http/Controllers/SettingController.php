@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
-use Exception;
 use App\Models\Setting;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class SettingController extends Controller
 {
@@ -15,10 +15,11 @@ class SettingController extends Controller
         try {
             // Fetch all settings as key-value pairs
             $settings = Setting::all()->pluck('value', 'key');
-            
+
             return Inertia::render('settings/index', compact('settings'));
         } catch (Exception $e) {
-            Log::error('Setting Error: ' . $e->getMessage());
+            Log::error('Setting Error: '.$e->getMessage());
+
             return redirect()->route('dashboard')->with('flash', $this->flashMessage('error'));
         }
     }
@@ -37,7 +38,8 @@ class SettingController extends Controller
 
             return back()->with('flash', $this->flashMessage('success', 'Settings updated successfully.'));
         } catch (Exception $e) {
-            Log::error('Setting Update Error: ' . $e->getMessage());
+            Log::error('Setting Update Error: '.$e->getMessage());
+
             return back()->with('flash', $this->flashMessage('error'));
         }
     }

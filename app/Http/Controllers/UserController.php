@@ -16,7 +16,8 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function __construct(protected UserInterface $user, protected RolePermissionInterface $rolePermission) {
+    public function __construct(protected UserInterface $user, protected RolePermissionInterface $rolePermission)
+    {
         $this->middleware('permission:users.view')->only(['index', 'show']);
         $this->middleware('permission:users.create')->only(['create', 'store']);
         $this->middleware('permission:users.edit')->only(['edit', 'update']);
@@ -35,8 +36,7 @@ class UserController extends Controller
             $list = $this->user->list($filter, true, $perPage);
 
             return Inertia::render('users/index', compact('list', 'q'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('User Error');
             Log::error($e->getMessage());
 
@@ -55,8 +55,7 @@ class UserController extends Controller
             $roles = $this->rolePermission->list();
 
             return Inertia::render('users/create', compact('roles'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('User Error');
             Log::error($e->getMessage());
 
@@ -70,13 +69,13 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(UserRequest $request): RedirectResponse
-    {   
+    {
         DB::beginTransaction();
         try {
             // Retrieve the validated input data...
             $validated = $request->validated();
             $validated = $request->safe()->only(['name', 'email']);
-            
+
             // Store to database
             $user = $this->user->store($validated);
 
@@ -84,14 +83,15 @@ class UserController extends Controller
             $user->assignRole($request->safe()->only('role'));
 
             DB::commit();
+
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully adding new user'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('User Error');
             Log::error($e);
+
             return redirect()
                 ->back()
                 ->with('flash', $this->flashMessage('error'));
@@ -116,10 +116,10 @@ class UserController extends Controller
             $roles = $this->rolePermission->list();
 
             return Inertia::render('users/edit', compact('user', 'roles'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('User Error');
             Log::error($e);
+
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('error'));
@@ -144,10 +144,10 @@ class UserController extends Controller
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('success', 'User updated!'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Log::error('User Update Error');
             Log::error($e);
+
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('error'));
@@ -165,8 +165,7 @@ class UserController extends Controller
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('success', 'Successfully deleting user'));
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('users.index')
                 ->with('flash', $this->flashMessage('error'));

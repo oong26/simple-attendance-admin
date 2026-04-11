@@ -40,7 +40,7 @@ class CheckQrCodeAction
                 'name' => $employee->name,
                 'email' => $employee->email,
                 'phone' => $employee->phone,
-                'photo_url' => $employee->photo_url,
+                'photo' => $employee->photo,
                 'is_active' => $employee->is_active,
                 'job_title' => $employee->job_title,
                 'department' => $employee->department ? [

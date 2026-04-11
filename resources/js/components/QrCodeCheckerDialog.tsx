@@ -28,7 +28,7 @@ interface EmployeeResult {
     name: string;
     email: string;
     phone: string;
-    photo_url: string | null;
+    photo: string | null;
     contract_type: string | null;
     job_title: string | null;
     is_active: boolean;
@@ -227,9 +227,9 @@ export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogP
                             </div>
 
                             <div className="flex items-start gap-4 p-4">
-                                {result.photo_url ? (
+                                {result.photo ? (
                                     <img
-                                        src={result.photo_url}
+                                        src={result.photo}
                                         alt={result.name}
                                         className="h-16 w-16 shrink-0 rounded-full object-cover ring-2 ring-border"
                                     />

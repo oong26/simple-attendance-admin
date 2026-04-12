@@ -1,57 +1,82 @@
+import { router } from "@inertiajs/react";
 import {
     Pagination,
     PaginationContent,
     PaginationItem,
     PaginationLink,
+    PaginationNext,
     PaginationPrevious,
-    PaginationNext
 } from "@/components/ui/pagination";
 
-export default function MyPagination({ data }) {
+function navigateTo(url: string | null) {
+    if (!url) return;
+    const params = new URLSearchParams(window.location.search);
+    const target = new URL(url, window.location.origin);
+
+    // Preserve existing query params (perPage, q, etc.) not already in target
+    params.forEach((value, key) => {
+        if (!target.searchParams.has(key)) {
+            target.searchParams.set(key, value);
+        }
+    });
+
+    router.visit(target.toString(), {
+        preserveState: true,
+        preserveScroll: false,
+    });
+}
+
+export default function MyPagination({ data }: { data: any }) {
     if (!data || !data.data || data.data.length === 0) return null;
 
     const links = data.links || [];
-
-    const prevUrl = data.prev_page_url;
-    const nextUrl = data.next_page_url;
+    const prevUrl: string | null = data.prev_page_url;
+    const nextUrl: string | null = data.next_page_url;
 
     const pageLinks = links.filter(
-        l => !l.label.includes("Previous") && !l.label.includes("Next")
+        (l: any) => !l.label.includes("Previous") && !l.label.includes("Next")
     );
 
     return (
         <Pagination className="mt-4 lg:justify-end">
-        <PaginationContent>
-            <PaginationItem>
-                <PaginationPrevious href={prevUrl || undefined} />
-            </PaginationItem>
-
-            {pageLinks.map((link, i) => {
-            const cleanLabel = link.label.replace(/&laquo;|&raquo;/g, "").trim();
-
-            return link.url ? (
-                <PaginationItem key={i}>
-                    <PaginationLink isActive={link.active}
-                        aria-disabled={link.active}
-                        className={link.active ? "pointer-events-none opacity-50" : ""}
-                        href={`${link.url}${link.url.includes('?') ? '&' : '?'}perPage=${new URLSearchParams(window.location.search).get('perPage') ?? 10}`}>
-                        {cleanLabel}
-                    </PaginationLink>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious
+                        aria-disabled={!prevUrl}
+                        className={!prevUrl ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        onClick={(e) => { e.preventDefault(); navigateTo(prevUrl); }}
+                    />
                 </PaginationItem>
-            ) : (
-                <PaginationItem key={i}>
-                    <PaginationLink>{cleanLabel}</PaginationLink>
-                </PaginationItem>
-            );
-            })}
 
-            <PaginationItem>
-            <PaginationNext
-                disabled={!nextUrl}
-                href={nextUrl || undefined}
-            />
-            </PaginationItem>
-        </PaginationContent>
+                {pageLinks.map((link: any, i: number) => {
+                    const cleanLabel = link.label.replace(/&laquo;|&raquo;/g, "").trim();
+
+                    return link.url ? (
+                        <PaginationItem key={i}>
+                            <PaginationLink
+                                isActive={link.active}
+                                aria-disabled={link.active}
+                                className={link.active ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                onClick={(e) => { e.preventDefault(); navigateTo(link.url); }}
+                            >
+                                {cleanLabel}
+                            </PaginationLink>
+                        </PaginationItem>
+                    ) : (
+                        <PaginationItem key={i}>
+                            <PaginationLink>{cleanLabel}</PaginationLink>
+                        </PaginationItem>
+                    );
+                })}
+
+                <PaginationItem>
+                    <PaginationNext
+                        aria-disabled={!nextUrl}
+                        className={!nextUrl ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        onClick={(e) => { e.preventDefault(); navigateTo(nextUrl); }}
+                    />
+                </PaginationItem>
+            </PaginationContent>
         </Pagination>
     );
 }

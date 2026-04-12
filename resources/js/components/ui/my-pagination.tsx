@@ -11,6 +11,10 @@ import {
 function navigateTo(url: string | null) {
     if (!url) return;
     const params = new URLSearchParams(window.location.search);
+
+    // Parse with a dummy base to safely extract path+search regardless of scheme.
+    // This avoids "blocked:mixed-content" when Laravel returns http:// URLs
+    // behind an HTTPS reverse proxy.
     const target = new URL(url, window.location.origin);
 
     // Preserve existing query params (perPage, q, etc.) not already in target
@@ -20,7 +24,8 @@ function navigateTo(url: string | null) {
         }
     });
 
-    router.visit(target.toString(), {
+    // Use only pathname + search — never the scheme/host from Laravel's URL
+    router.visit(target.pathname + target.search, {
         preserveState: true,
         preserveScroll: false,
     });

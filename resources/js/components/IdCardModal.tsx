@@ -10,7 +10,7 @@ import {
 import { toPng } from 'html-to-image';
 import { Download, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Employee {
     id: string | number;
@@ -38,6 +38,18 @@ const CARD_H = 519;
 export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
+
+    // Inject Poppins from Google Fonts once
+    useEffect(() => {
+        const linkId = 'google-font-poppins';
+        if (!document.getElementById(linkId)) {
+            const link = document.createElement('link');
+            link.id = linkId;
+            link.rel = 'stylesheet';
+            link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap';
+            document.head.appendChild(link);
+        }
+    }, []);
 
     const formatPhone = (phone: string) => {
     const digits = phone.replace(/\D/g, ''); // strip non-digits just in case
@@ -109,7 +121,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                 borderRadius: '14px',
                                 overflow: 'hidden',
                                 boxShadow: '0 6px 32px rgba(0,0,0,0.22)',
-                                fontFamily: "'Arial', sans-serif",
+                                fontFamily: "'Poppins', sans-serif",
                                 flexShrink: 0,
                             }}
                         >
@@ -193,9 +205,9 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                     left: 0,
                                     right: 0,
                                     textAlign: 'center',
-                                    fontSize: '15px',
+                                    fontSize: '16px',
                                     fontWeight: '800',
-                                    color: '#1a1a6e',
+                                    color: '#003399',
                                     letterSpacing: '0.01em',
                                     lineHeight: 1.2,
                                     padding: '0 12px',
@@ -212,7 +224,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                     left: `${CARD_W * 0.12}px`,
                                     right: `${CARD_W * 0.12}px`,
                                     height: '1.5px',
-                                    background: '#1a1a6e',
+                                    background: '#003399',
                                 }}
                             />
 
@@ -224,9 +236,9 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                     left: 0,
                                     right: 0,
                                     textAlign: 'center',
-                                    fontSize: '11px',
-                                    fontWeight: '600',
-                                    color: '#2563eb',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    color: '#003399',
                                     letterSpacing: '0.02em',
                                 }}
                             >

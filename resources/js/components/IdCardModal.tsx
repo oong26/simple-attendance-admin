@@ -230,7 +230,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                     letterSpacing: '0.02em',
                                 }}
                             >
-                                {employee.job_title || employee.department?.name || 'Employee'}
+                                {employee.job_title || '-'}
                             </div>
 
                             {/* ── Contact grid (E-MAIL / PHONE) ── */}

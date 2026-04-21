@@ -54,6 +54,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MoreVertical } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -64,6 +65,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface Employee {
     id: string;
+    employee_number: string;
     name: string;
     email: string;
     phone: string;
@@ -248,6 +250,7 @@ export default function Index() {
                                 <TableHead className="w-[50px]">#</TableHead>
                                 <TableHead>Photo</TableHead>
                                 <TableHead>Name</TableHead>
+                                <TableHead>Employee Number</TableHead>
                                 <TableHead>Department</TableHead>
                                 <TableHead>Job Title</TableHead>
                                 <TableHead>Shift</TableHead>
@@ -288,6 +291,27 @@ export default function Index() {
                                             <div className="text-xs text-muted-foreground">
                                                 {item.email}
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium text-blue-600">
+                                            <span
+                                                style={{ cursor: item.employee_number ? 'pointer' : 'default' }}
+                                                title={item.employee_number ? 'Click to copy' : undefined}
+                                                onClick={() => {
+                                                    if (item.employee_number) {
+                                                        navigator.clipboard.writeText(item.employee_number);
+                                                        toast.success("Employee number copied");
+                                                    }
+                                                }}
+                                            >
+                                                {item.employee_number ?? '-'}
+                                                {item.employee_number && (
+                                                    <span
+                                                        className="ml-1 text-xs text-gray-400"
+                                                    >
+                                                        (Click to copy)
+                                                    </span>
+                                                )}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             {item.department?.name ?? '-'}
@@ -401,7 +425,7 @@ export default function Index() {
                             <TableBody>
                                 <TableRow>
                                     <TableCell
-                                        colSpan={8}
+                                        colSpan={9}
                                         className="text-center"
                                     >
                                         No records.

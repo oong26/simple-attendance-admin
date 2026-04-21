@@ -39,6 +39,7 @@ interface Props {
 export default function Create() {
     const { departments } = usePage<any>().props as Props;
     const { data, setData, post, processing, errors } = useForm({
+        employee_number: '',
         name: '',
         email: '',
         phone: '',
@@ -85,6 +86,22 @@ export default function Create() {
                     >
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
+                                <RequiredLabel htmlFor="employee_number">Employee Number</RequiredLabel>
+                                <Input
+                                    id="employee_number"
+                                    value={data.employee_number}
+                                    onChange={(e) =>
+                                        setData('employee_number', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.employee_number && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.employee_number}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
                                 <RequiredLabel htmlFor="name">Name</RequiredLabel>
                                 <Input
                                     id="name"
@@ -100,6 +117,9 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -116,9 +136,6 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone</Label>
                                 <Input
@@ -134,6 +151,9 @@ export default function Create() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="job_title">Job Title</Label>
                                 <Input

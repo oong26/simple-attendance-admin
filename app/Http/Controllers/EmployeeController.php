@@ -50,6 +50,7 @@ class EmployeeController extends Controller
     {
         try {
             $validated = $request->validate([
+                'employee_number' => 'required|string|max:50|unique:employees,employee_number',
                 'name' => 'required|string|max:255',
                 'email' => 'nullable|email|max:255|unique:employees,email',
                 'phone' => 'nullable|string|max:20',
@@ -96,8 +97,9 @@ class EmployeeController extends Controller
     {
         try {
             $validated = $request->validate([
+                'employee_number' => 'required|string|max:50|unique:employees,employee_number,' . $id,
                 'name' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255|unique:employees,email,'.$id,
+                'email' => 'nullable|email|max:255|unique:employees,email,' . $id,
                 'phone' => 'nullable|string|max:20',
                 'department_id' => 'nullable|exists:departments,id',
                 'job_title' => 'nullable|string|max:100',

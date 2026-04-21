@@ -14,7 +14,8 @@ class EmployeeRepository implements EmployeeInterface
         $data = Employee::with(['department'])
             ->when($name, function ($query) use ($name) {
                 $query->where('name', 'LIKE', "%$name%")
-                    ->orWhere('email', 'LIKE', "%$name%");
+                    ->orWhere('email', 'LIKE', "%$name%")
+                    ->orWhere('employee_number',  'LIKE', "%$name%");
             })
             ->latest();
         if ($pagination) {

@@ -30,6 +30,7 @@ export default function Edit() {
     // Note: Use _method: 'PUT' for file uploads with Inertia as standard PUT requests don't support multipart/form-data well in some setups
     const { data, setData, post, processing, errors } = useForm({
         _method: 'PUT',
+        employee_number: employee.employee_number,
         name: employee.name,
         email: employee.email ?? '',
         phone: employee.phone ?? '',
@@ -88,6 +89,22 @@ export default function Edit() {
                     >
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
+                                <Label htmlFor="employee_number">Employee Number</Label>
+                                <Input
+                                    id="employee_number"
+                                    value={data.employee_number}
+                                    onChange={(e) =>
+                                        setData('employee_number', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.employee_number && (
+                                    <p className="text-sm text-red-500">
+                                        {errors.employee_number}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input
                                     id="name"
@@ -103,6 +120,9 @@ export default function Edit() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -119,9 +139,6 @@ export default function Edit() {
                                     </p>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone</Label>
                                 <Input
@@ -137,6 +154,9 @@ export default function Edit() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="job_title">Job Title</Label>
                                 <Input

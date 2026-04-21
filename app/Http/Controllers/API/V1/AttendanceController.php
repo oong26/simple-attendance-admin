@@ -536,13 +536,15 @@ class AttendanceController extends Controller
 
             $qrData = json_decode($request->qrcode_data, true);
 
-            if (! $qrData || ! isset($qrData['employee_id'])) {
+            if (! $qrData || ! isset($qrData['employee_number'])) {
                 return response()->json(['message' => 'Invalid QR Code data'], 400);
             }
 
-            $employeeId = $qrData['employee_id'];
+            $employeeNumber = $qrData['employee_number'];
 
-            $employee = Employee::with('department')->find($employeeId);
+            $employee = Employee::with('department')
+                ->where('employee_number', $employeeNumber)
+                ->first();
 
             if (! $employee) {
                 return response()->json(['message' => 'Employee not found'], 404);

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Employee {
     id: string | number;
+    employee_number: string;
     name: string;
     email?: string | null;
     phone?: string | null;
@@ -285,7 +286,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                 }}
                             >
                                 <QRCodeSVG
-                                    value={JSON.stringify({ employee_id: employee.id })}
+                                    value={JSON.stringify({ employee_number: employee.employee_number })}
                                     size={70}
                                     level="H"
                                     includeMargin={false}

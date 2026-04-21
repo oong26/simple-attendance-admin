@@ -476,7 +476,7 @@ export default function Index() {
                             <div className="rounded-xl border bg-white p-4 shadow-sm">
                                 <QRCodeSVG
                                     value={JSON.stringify({
-                                        employee_id: qrEmployee.id,
+                                        employee_number: qrEmployee.employee_number,
                                     })}
                                     size={250}
                                     level="H"

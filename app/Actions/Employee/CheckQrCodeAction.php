@@ -16,15 +16,16 @@ class CheckQrCodeAction
 
         $payload = json_decode($request->qr_data, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE || ! isset($payload['employee_id'])) {
+        if (json_last_error() !== JSON_ERROR_NONE || ! isset($payload['employee_number'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid QR code format. Expected JSON with employee_id.',
+                'message' => 'Invalid QR code format. Expected JSON with employee_number.',
             ], 422);
         }
 
         $employee = Employee::with(['department'])
-            ->find($payload['employee_id']);
+            ->where('employee_number', $payload['employee_number'])
+            ->first();
 
         if (! $employee) {
             return response()->json([
@@ -37,6 +38,7 @@ class CheckQrCodeAction
             'success' => true,
             'employee' => [
                 'id' => $employee->id,
+                'employee_number' => $employee->employee_number,
                 'name' => $employee->name,
                 'email' => $employee->email,
                 'phone' => $employee->phone,

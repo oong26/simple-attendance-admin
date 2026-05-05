@@ -259,7 +259,7 @@ export default function Dashboard() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <span
-                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${log.status === 'present' ? 'bg-green-100 text-green-800' : ''} ${log.status === 'late' ? 'bg-red-100 text-red-800' : ''} ${log.status === 'absent' ? 'bg-gray-100 text-gray-800' : ''} `}
+                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${log.status === 'on-time' ? 'bg-green-100 text-green-800' : ''} ${log.status === 'late' ? 'bg-red-100 text-red-800' : ''} ${log.status === 'absent' ? 'bg-gray-100 text-gray-800' : ''} `}
                                                 >
                                                     {log.status
                                                         .charAt(0)

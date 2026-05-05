@@ -65,7 +65,7 @@ class AttendanceController extends Controller
                 ->get();
 
             $totalWorkDays = $attendances->count();
-            $onTimeCount = $attendances->where('status', 'present')->count();
+            $onTimeCount = $attendances->where('status', 'on-time')->count();
 
             $punctuality = 0;
             if ($totalWorkDays > 0) {
@@ -268,7 +268,7 @@ class AttendanceController extends Controller
             }
 
             // Calculate Late
-            $status = 'present';
+            $status = 'on-time';
             $lateMinutes = 0;
 
             $todayDayName = Carbon::now()->format('l');
@@ -609,7 +609,7 @@ class AttendanceController extends Controller
 
             // CLOCK IN LOGIC
             if (! $attendance || ($attendance && $attendance->status === 'arrive_late' && ! $attendance->clock_in_time)) {
-                $status = 'present';
+                $status = 'on-time';
                 $lateMinutes = 0;
 
                 $todayDayName = Carbon::now()->format('l');

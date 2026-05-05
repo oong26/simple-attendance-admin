@@ -126,7 +126,7 @@ export default function MonthlyReport() {
             const record = attendanceMap[cDay.date]?.[emp.id];
             
             if (record) {
-                if (record.status === 'present') { presensi++; }
+                if (record.status === 'on-time') { presensi++; }
                 else if (record.status === 'absent') { if (!isLibur) alpha++; }
                 else if (record.status === 'leave') {
                     const ltype = (record.leave_type || '').toLowerCase();
@@ -271,7 +271,7 @@ export default function MonthlyReport() {
                 if (isLibur && !record) {
                     statusM = 'LIBUR'; statusP = 'LIBUR';
                 } else if (record) {
-                    if (record.status === 'present') {
+                    if (record.status === 'on-time') {
                         jamMasukAbsen = record.clock_in ? record.clock_in.substring(11, 16) : '-';
                         jamPulangAbsen = record.clock_out ? record.clock_out.substring(11, 16) : '-';
                         terlambat = record.late_minutes;
@@ -509,7 +509,7 @@ export default function MonthlyReport() {
                                                     if (isLibur && !record) {
                                                         statusM = 'LIBUR'; statusP = 'LIBUR';
                                                     } else if (record) {
-                                                        if (record.status === 'present') {
+                                                        if (record.status === 'on-time') {
                                                             jamMasukAbsen = record.clock_in ? record.clock_in.substring(11, 16) : '-';
                                                             jamPulangAbsen = record.clock_out ? record.clock_out.substring(11, 16) : '-';
                                                             terlambat = record.late_minutes;

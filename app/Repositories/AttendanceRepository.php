@@ -95,7 +95,7 @@ class AttendanceRepository implements AttendanceInterface
         }
 
         // Calculate status
-        $status = 'present';
+        $status = 'on-time';
         $lateMinutes = 0;
         $lateDeduction = 0;
 

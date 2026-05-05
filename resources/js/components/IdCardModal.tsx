@@ -293,7 +293,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                             >
                                 {scannerType === 'qrcode' ? (
                                     <QRCodeSVG
-                                        value={JSON.stringify({ employee_number: employee.employee_number })}
+                                        value={employee.employee_number}
                                         size={70}
                                         level="H"
                                         includeMargin={false}
@@ -304,10 +304,10 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                         className="[&>svg]:max-w-full [&>svg]:h-auto"
                                     >
                                         <Barcode
-                                            value={JSON.stringify({ employee_number: employee.employee_number })}
+                                            value={employee.employee_number}
                                             format="CODE128"
                                             width={2}
-                                            height={100}
+                                            height={50}
                                             displayValue={false}
                                             background="transparent"
                                             margin={20}

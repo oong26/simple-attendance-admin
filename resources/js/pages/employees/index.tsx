@@ -480,9 +480,7 @@ export default function Index() {
                                 {scannerType === 'barcode' ? (
                                     <div className="w-full overflow-hidden flex justify-center [&>svg]:max-w-full [&>svg]:h-auto">
                                         <Barcode
-                                            value={JSON.stringify({
-                                                employee_number: qrEmployee.employee_number,
-                                            })}
+                                            value={qrEmployee.employee_number}
                                             format="CODE128"
                                             displayValue={false}
                                             background="transparent"
@@ -492,9 +490,7 @@ export default function Index() {
                                     </div>
                                 ) : (
                                     <QRCodeSVG
-                                        value={JSON.stringify({
-                                            employee_number: qrEmployee.employee_number,
-                                        })}
+                                        value={qrEmployee.employee_number}
                                         size={250}
                                         level="H"
                                         includeMargin={true}

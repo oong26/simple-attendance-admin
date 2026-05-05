@@ -58,6 +58,7 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn () => $request->session()->get('flash.message'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'scanner_type' => (\App\Models\ScannerType::first()?->type ?? 'barcode'),
         ];
     }
 }

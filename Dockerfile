@@ -58,9 +58,20 @@ RUN apt-get update && apt-get install -y \
     netcat-traditional \
     && rm -rf /var/lib/apt/lists/* \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip pcntl
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip pcntl opcache
 
 WORKDIR /var/www/html
+
+# OPcache setup
+RUN { \
+  echo 'opcache.memory_consumption=128'; \
+  echo 'opcache.interned_strings_buffer=8'; \
+  echo 'opcache.max_accelerated_files=10000'; \
+  echo 'opcache.revalidate_freq=0'; \
+  echo 'opcache.validate_timestamps=0'; \
+  echo 'opcache.fast_shutdown=1'; \
+  echo 'opcache.enable_cli=1'; \
+} > /usr/local/etc/php/conf.d/opcache-optimized.ini
 
 # Copy project files from context
 COPY . .

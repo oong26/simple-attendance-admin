@@ -8,9 +8,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
-import { CheckCircle2, Loader2, QrCode, RotateCcw, XCircle } from 'lucide-react';
+import { BrowserQRCodeReader, BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
+import { CheckCircle2, Loader2, QrCode, RotateCcw, XCircle, Barcode } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 
 interface ShiftInfo {
     name: string;
@@ -41,6 +42,9 @@ interface QrCodeCheckerDialogProps {
 }
 
 export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogProps) {
+    const { scanner_type } = usePage<any>().props;
+    const scannerType = scanner_type || 'barcode';
+
     const controlsRef = useRef<IScannerControls | null>(null);
     const hasScannedRef = useRef(false);
 
@@ -104,7 +108,9 @@ export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogP
             hasScannedRef.current = false;
             setCameraError(null);
 
-            const reader = new BrowserQRCodeReader();
+            const reader = scannerType === 'qrcode' 
+                ? new BrowserQRCodeReader() 
+                : new BrowserMultiFormatReader();
 
             reader
                 .decodeFromConstraints(
@@ -161,11 +167,15 @@ export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogP
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <QrCode className="h-5 w-5" />
-                        Scan QR Code
+                        {scannerType === 'qrcode' ? (
+                            <QrCode className="h-5 w-5" />
+                        ) : (
+                            <Barcode className="h-5 w-5" />
+                        )}
+                        Scan {scannerType === 'qrcode' ? 'QR Code' : 'Barcode'}
                     </DialogTitle>
                     <DialogDescription>
-                        Point the camera at an employee QR code to verify if it's registered.
+                        Point the camera at an employee {scannerType === 'qrcode' ? 'QR code' : 'barcode'} to verify if it's registered.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -207,7 +217,7 @@ export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogP
                                         Verifying…
                                     </span>
                                 ) : scanning ? (
-                                    <span className="text-emerald-300">Scanning for QR code…</span>
+                                    <span className="text-emerald-300">Scanning for {scannerType === 'qrcode' ? 'QR code' : 'barcode'}…</span>
                                 ) : (
                                     <span className="text-white/60">Starting camera…</span>
                                 )}
@@ -222,7 +232,7 @@ export function QrCodeCheckerDialog({ open, onOpenChange }: QrCodeCheckerDialogP
                             <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2.5 dark:bg-emerald-950/30">
                                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                 <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                                    QR code is registered
+                                    {scannerType === 'qrcode' ? 'QR code' : 'Barcode'} is registered
                                 </span>
                             </div>
 

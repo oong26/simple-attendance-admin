@@ -28,6 +28,7 @@ Route::middleware(['api-key'])
                 Route::get('/history', [AttendanceController::class, 'history']);
                 Route::get('/today', [AttendanceController::class, 'today']);
                 Route::get('/department', [AttendanceController::class, 'department']);
+                Route::get('/scanner-type', [AttendanceController::class, 'scannerType']);
             });
 
     });

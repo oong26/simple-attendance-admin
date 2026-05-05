@@ -1,6 +1,7 @@
 import { FaceCaptureDialog } from '@/components/FaceCaptureDialog';
 import { IdCardModal } from '@/components/IdCardModal';
 import { QrCodeCheckerDialog } from '@/components/QrCodeCheckerDialog';
+import Barcode from 'react-barcode';
 import TableControls from '@/components/table-controls';
 import {
     AlertDialog,
@@ -98,6 +99,8 @@ interface PageProps {
 }
 
 export default function Index() {
+    const { scanner_type } = usePage<any>().props;
+    const scannerType = scanner_type || 'barcode';
     const { can, canAny } = usePermission();
     const { list, q, flash, matched_employee } = usePage<any>()
         .props as PageProps & { flash: any; matched_employee: Employee | null };
@@ -221,7 +224,7 @@ export default function Index() {
                                 variant="outline"
                                 onClick={() => setIsQrCheckerOpen(true)}
                             >
-                                Check QR Code
+                                {scannerType === 'barcode' ? 'Check Barcode' : 'Check QR Code'}
                             </Button>
                             <Button
                                 variant="outline"
@@ -387,7 +390,7 @@ export default function Index() {
                                                             setQrEmployee(item)
                                                         }
                                                     >
-                                                        View QR Code
+                                                        {scannerType === 'barcode' ? 'View Barcode' : 'View QR Code'}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() =>
@@ -461,27 +464,42 @@ export default function Index() {
                 open={qrEmployee !== null}
                 onOpenChange={(v) => !v && setQrEmployee(null)}
             >
-                <DialogContent className="flex flex-col items-center sm:max-w-md">
+                <DialogContent className={`flex flex-col items-center ${scannerType === 'barcode' ? 'sm:max-w-xl' : 'sm:max-w-md'}`}>
                     <DialogHeader className="w-full">
                         <DialogTitle className="text-center">
-                            QR Code Attendance
+                            {scannerType === 'barcode' ? 'Barcode Attendance' : 'QR Code Attendance'}
                         </DialogTitle>
                         <DialogDescription className="text-center">
-                            Scan this QR code using the attendance kiosk device
+                            Scan this {scannerType === 'barcode' ? 'barcode' : 'QR code'} using the attendance kiosk device
                             to clock in or out.
                         </DialogDescription>
                     </DialogHeader>
                     {qrEmployee && (
-                        <div className="flex flex-col items-center justify-center space-y-6 p-6">
-                            <div className="rounded-xl border bg-white p-4 shadow-sm">
-                                <QRCodeSVG
-                                    value={JSON.stringify({
-                                        employee_number: qrEmployee.employee_number,
-                                    })}
-                                    size={250}
-                                    level="H"
-                                    includeMargin={true}
-                                />
+                        <div className="flex flex-col items-center justify-center space-y-6 p-6 w-full max-w-full">
+                            <div className="rounded-xl border bg-white p-4 shadow-sm flex justify-center items-center overflow-hidden w-full max-w-full">
+                                {scannerType === 'barcode' ? (
+                                    <div className="w-full overflow-hidden flex justify-center [&>svg]:max-w-full [&>svg]:h-auto">
+                                        <Barcode
+                                            value={JSON.stringify({
+                                                employee_number: qrEmployee.employee_number,
+                                            })}
+                                            format="CODE128"
+                                            displayValue={false}
+                                            background="transparent"
+                                            margin={0}
+                                            width={1.5}
+                                        />
+                                    </div>
+                                ) : (
+                                    <QRCodeSVG
+                                        value={JSON.stringify({
+                                            employee_number: qrEmployee.employee_number,
+                                        })}
+                                        size={250}
+                                        level="H"
+                                        includeMargin={true}
+                                    />
+                                )}
                             </div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold">

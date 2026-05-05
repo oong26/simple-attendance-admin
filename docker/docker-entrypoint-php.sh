@@ -38,6 +38,12 @@ php artisan config:clear || true
 php artisan cache:clear || true
 php artisan config:cache || true
 
+# Optimizing laravel
+echo "Caching Laravel for Production..."
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
 # Run migrations if MIGRATE=true
 if [ "${MIGRATE:-true}" = "true" ]; then
     echo "Running migrations..."

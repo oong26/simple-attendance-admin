@@ -10,7 +10,9 @@ import {
 import { toPng } from 'html-to-image';
 import { Download, Loader2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import Barcode from 'react-barcode';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 
 interface Employee {
     id: string | number;
@@ -37,6 +39,9 @@ const CARD_W = 330;
 const CARD_H = 519;
 
 export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) {
+    const { scanner_type } = usePage<any>().props;
+    const scannerType = scanner_type || 'barcode';
+
     const cardRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
 
@@ -274,7 +279,7 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                 </span>
                             </div>
 
-                            {/* ── QR Code ── */}
+                            {/* ── QR/Barcode ── */}
                             <div
                                 style={{
                                     position: 'absolute',
@@ -283,14 +288,33 @@ export function IdCardModal({ employee, open, onOpenChange }: IdCardModalProps) 
                                     right: 0,
                                     display: 'flex',
                                     justifyContent: 'center',
+                                    alignItems: 'center',
                                 }}
                             >
-                                <QRCodeSVG
-                                    value={JSON.stringify({ employee_number: employee.employee_number })}
-                                    size={70}
-                                    level="H"
-                                    includeMargin={false}
-                                />
+                                {scannerType === 'qrcode' ? (
+                                    <QRCodeSVG
+                                        value={JSON.stringify({ employee_number: employee.employee_number })}
+                                        size={70}
+                                        level="H"
+                                        includeMargin={false}
+                                    />
+                                ) : (
+                                    <div 
+                                        style={{ width: '60%', display: 'flex', justifyContent: 'center' }} 
+                                        className="[&>svg]:max-w-full [&>svg]:h-auto"
+                                    >
+                                        <Barcode
+                                            value={JSON.stringify({ employee_number: employee.employee_number })}
+                                            format="CODE128"
+                                            width={2}
+                                            height={100}
+                                            displayValue={false}
+                                            background="transparent"
+                                            margin={20}
+                                        />
+                                        {/* <p className='mt-0 text-sm font-mono text-gray-600'>{employee.employee_number}</p> */}
+                                    </div>
+                                )}
                             </div>
 
                             {/* ── Footer ── */}

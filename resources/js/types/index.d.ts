@@ -28,6 +28,7 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    scanner_type?: 'qrcode' | 'barcode';
     [key: string]: unknown;
 }
 

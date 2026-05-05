@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\LateDeductionRule;
+use App\Models\ScannerType;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
@@ -193,6 +195,25 @@ class AttendanceController extends Controller
 
             return response()->json(['success' => false, 'message' => 'Server Error'], 500);
         }
+    }
+
+    public function scannerType()
+    {
+        $data = Cache::remember('scanner_type', 60 * 10, function () {
+            return ScannerType::first();
+        });
+
+        if ($data == null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No scanner type found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 
     public function clockIn(Request $request)
@@ -534,13 +555,13 @@ class AttendanceController extends Controller
                 'qrcode_data' => 'required|string',
             ]);
 
-            $qrData = json_decode($request->qrcode_data, true);
+            $qrData = $request->qrcode_data;
 
-            if (! $qrData || ! isset($qrData['employee_number'])) {
+            if (! $qrData) {
                 return response()->json(['message' => 'Invalid QR Code data'], 400);
             }
 
-            $employeeNumber = $qrData['employee_number'];
+            $employeeNumber = $qrData;
 
             $employee = Employee::with('department')
                 ->where('employee_number', $employeeNumber)
@@ -629,11 +650,17 @@ class AttendanceController extends Controller
                     }
                 }
 
+                $scannerTypeData = ScannerType::first();
+                $scannerType = 'qrcode';
+                if ($scannerTypeData != null) {
+                    $scannerType = $scannerTypeData->type;
+                }
+
                 if ($isArriveLatePermission) {
                     $attendance->update([
                         'clock_in_time' => $now->toTimeString(),
                         'status' => $status,
-                        'attendance_type' => 'qrcode',
+                        'attendance_type' => $scannerType,
                         'late_minutes' => $lateMinutes,
                         'late_deduction' => $totalDeduction,
                     ]);
@@ -644,7 +671,7 @@ class AttendanceController extends Controller
                         'date' => $today,
                         'clock_in_time' => $now->toTimeString(),
                         'status' => $status,
-                        'attendance_type' => 'qrcode',
+                        'attendance_type' => $scannerType,
                         'late_minutes' => $lateMinutes,
                         'late_deduction' => $totalDeduction,
                     ]);
